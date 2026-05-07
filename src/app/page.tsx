@@ -163,7 +163,7 @@ export default function DashboardPage() {
       <div className="flex items-start justify-between px-6 pt-8 pb-6">
         <div>
           <h1 className="text-3xl font-light tracking-[-0.02em] text-text-display">
-            Dashboard
+            Dashboard de Guillermo Polanco
           </h1>
           <p className="nd-label mt-1">
             {MESES_ES[now.getMonth()].toUpperCase()} {now.getFullYear()}
