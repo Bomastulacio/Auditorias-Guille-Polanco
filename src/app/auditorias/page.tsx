@@ -43,7 +43,7 @@ export default function AuditoriasPage() {
 
   const mesesDisponibles = [...new Set(auditorias.map(a => a.mes.slice(0, 7)))].sort().reverse();
 
-  const selectCls = 'bg-transparent border-b border-[#333333] px-0 py-2 font-mono text-[11px] tracking-[0.05em] text-text-secondary focus:outline-none focus:border-text-primary transition-colors appearance-none cursor-pointer pr-6';
+  const selectCls = 'bg-transparent border-b border-nd-border-vis px-0 py-2 font-mono text-[11px] tracking-[0.05em] text-text-secondary focus:outline-none focus:border-text-primary transition-colors appearance-none cursor-pointer pr-6';
 
   return (
     <div className="max-w-3xl mx-auto w-full">
@@ -57,29 +57,29 @@ export default function AuditoriasPage() {
           )}
         </div>
         <Link href="/auditorias/nueva"
-          className="flex items-center gap-2 h-9 px-5 bg-text-display text-background rounded-full font-mono text-[11px] tracking-[0.06em] hover:bg-text-primary transition-colors">
+          className="flex items-center gap-2 h-9 px-5 bg-text-display text-background rounded-full font-mono text-[11px] tracking-[0.06em] hover:bg-text-primary transition-all shadow-lg active:scale-95">
           <Plus size={13} strokeWidth={2.5} />
           NUEVA
         </Link>
       </div>
 
-      <div className="border-t border-[#222222]" />
+      <div className="border-t border-nd-border" />
 
       {/* Filters */}
-      <div className="px-6 py-4 flex gap-6 border-b border-[#222222]">
-        <div className="relative flex-1">
+      <div className="px-6 py-4 flex gap-6 border-b border-nd-border overflow-x-auto">
+        <div className="relative flex-1 min-w-[140px]">
           <select value={filterMes} onChange={e => setFilterMes(e.target.value)} className={selectCls}>
-            <option value="">TODOS LOS MESES</option>
+            <option value="" className="bg-surface">TODOS LOS MESES</option>
             {mesesDisponibles.map(m => {
               const [y, mon] = m.split('-');
-              return <option key={m} value={m}>{MESES_ES[parseInt(mon) - 1].toUpperCase()} {y}</option>;
+              return <option key={m} value={m} className="bg-surface">{MESES_ES[parseInt(mon) - 1].toUpperCase()} {y}</option>;
             })}
           </select>
         </div>
-        <div className="relative flex-1">
+        <div className="relative flex-1 min-w-[140px]">
           <select value={filterMedicoId} onChange={e => setFilterMedicoId(e.target.value)} className={selectCls}>
-            <option value="">TODOS LOS MÉDICOS</option>
-            {medicos.map(m => <option key={m.id} value={m.id}>{m.apellido}, {m.nombre}</option>)}
+            <option value="" className="bg-surface">TODOS LOS MÉDICOS</option>
+            {medicos.map(m => <option key={m.id} value={m.id} className="bg-surface">{m.apellido}, {m.nombre}</option>)}
           </select>
         </div>
       </div>
@@ -95,23 +95,23 @@ export default function AuditoriasPage() {
             {auditorias.length === 0 ? 'No hay auditorías registradas.' : 'Sin resultados para esos filtros.'}
           </p>
           {auditorias.length === 0 && (
-            <Link href="/auditorias/nueva" className="font-mono text-[11px] text-interactive mt-1 block">
+            <Link href="/auditorias/nueva" className="font-mono text-[11px] text-interactive mt-1 block hover:underline">
               CREAR LA PRIMERA →
             </Link>
           )}
         </div>
       ) : (
-        <ul>
-          {filtered.map((a, idx) => {
+        <ul className="bg-surface divide-y divide-nd-border">
+          {filtered.map((a) => {
             const hcCount = a.historias_clinicas.length;
             const desvios = a.historias_clinicas.filter(h => h.correccion !== '-').length;
             const pct = hcCount > 0 ? (desvios / hcCount * 100).toFixed(1) : '0.0';
             return (
-              <li key={a.id} className={idx !== 0 ? 'border-t border-[#1A1A1A]' : ''}>
+              <li key={a.id}>
                 <Link href={`/auditorias/${a.id}`}
-                  className="flex items-center gap-4 px-6 py-4 hover:bg-surface-raised transition-colors group">
+                  className="flex items-center gap-4 px-6 py-4 hover:bg-surface-raised transition-all group">
                   {/* Status dot */}
-                  <div className={`w-1.5 h-1.5 rounded-full flex-shrink-0 ${a.completada ? 'bg-success' : 'bg-[#444444]'}`} />
+                  <div className={`w-1.5 h-1.5 rounded-full flex-shrink-0 ${a.completada ? 'bg-success shadow-[0_0_8px_rgba(74,158,92,0.4)]' : 'bg-text-disabled'}`} />
 
                   {/* Info */}
                   <div className="flex-1 min-w-0">
@@ -130,10 +130,10 @@ export default function AuditoriasPage() {
                   </div>
 
                   {/* Badge */}
-                  <div className={`flex items-center gap-1.5 px-3 py-1 border rounded-full font-mono text-[10px] tracking-[0.04em] flex-shrink-0 ${
+                  <div className={`flex items-center gap-1.5 px-3 py-1 border rounded-full font-mono text-[10px] tracking-[0.04em] flex-shrink-0 transition-colors ${
                     a.completada
-                      ? 'border-success/40 text-success'
-                      : 'border-[#333333] text-text-disabled'
+                      ? 'border-success/40 text-success bg-success/5'
+                      : 'border-nd-border-vis text-text-disabled'
                   }`}>
                     {a.completada
                       ? <><CheckCircle2 size={10} strokeWidth={1.5} />COMPLETA</>
@@ -141,7 +141,7 @@ export default function AuditoriasPage() {
                     }
                   </div>
 
-                  <ChevronRight size={14} className="text-text-disabled group-hover:text-text-secondary transition-colors flex-shrink-0" />
+                  <ChevronRight size={14} className="text-text-disabled group-hover:text-text-primary transition-colors flex-shrink-0" />
                 </Link>
               </li>
             );

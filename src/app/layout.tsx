@@ -2,6 +2,8 @@ import type { Metadata, Viewport } from "next";
 import { Space_Grotesk, Space_Mono } from "next/font/google";
 import "./globals.css";
 import Navigation from "@/components/Navigation";
+import { ThemeProvider } from "@/components/ThemeProvider";
+import FloatingControls from "@/components/FloatingControls";
 
 const spaceGrotesk = Space_Grotesk({
   variable: "--font-sans",
@@ -40,12 +42,15 @@ export default function RootLayout({
   children,
 }: Readonly<{ children: React.ReactNode }>) {
   return (
-    <html lang="es" className={`${spaceGrotesk.variable} ${spaceMono.variable}`}>
+    <html lang="es" suppressHydrationWarning className={`${spaceGrotesk.variable} ${spaceMono.variable}`}>
       <body className="antialiased bg-background text-text-primary min-h-screen overflow-x-hidden flex">
-        <Navigation />
-        <main className="flex-1 flex flex-col min-h-screen pb-20 md:pb-0 h-screen overflow-y-auto">
-          {children}
-        </main>
+        <ThemeProvider attribute="class" defaultTheme="dark" enableSystem={false}>
+          <Navigation />
+          <main id="main-content" className="flex-1 flex flex-col min-h-screen pb-20 md:pb-0 h-screen overflow-y-auto scroll-smooth">
+            {children}
+            <FloatingControls />
+          </main>
+        </ThemeProvider>
       </body>
     </html>
   );

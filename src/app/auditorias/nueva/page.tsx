@@ -10,7 +10,7 @@ import { ChevronLeft, Loader2, Info } from 'lucide-react';
 
 const today = new Date();
 
-const selectCls = 'w-full bg-transparent border-b border-[#333333] px-0 py-2.5 font-mono text-sm text-text-primary focus:outline-none focus:border-text-primary transition-colors appearance-none cursor-pointer';
+const selectCls = 'w-full bg-transparent border-b border-nd-border-vis px-0 py-2.5 font-mono text-sm text-text-primary focus:outline-none focus:border-text-primary transition-colors appearance-none cursor-pointer';
 const labelCls = 'nd-label block mb-2';
 
 export default function NuevaAuditoriaPage() {
@@ -57,14 +57,14 @@ export default function NuevaAuditoriaPage() {
       {/* Header */}
       <div className="px-6 pt-8 pb-6">
         <Link href="/auditorias"
-          className="inline-flex items-center gap-1.5 nd-label hover:text-text-secondary transition-colors mb-6">
+          className="inline-flex items-center gap-1.5 nd-label hover:text-text-primary transition-colors mb-6">
           <ChevronLeft size={14} strokeWidth={1.5} />
           AUDITORÍAS
         </Link>
         <h1 className="text-3xl font-light tracking-[-0.02em] text-text-display">Nueva Auditoría</h1>
       </div>
 
-      <div className="border-t border-[#222222]" />
+      <div className="border-t border-nd-border" />
 
       {/* Form */}
       <div className="px-6 py-8 space-y-8">
@@ -80,11 +80,15 @@ export default function NuevaAuditoriaPage() {
               <Link href="/medicos" className="text-interactive">AGREGAR →</Link>
             </p>
           ) : (
-            <select value={medicoId} onChange={e => setMedicoId(e.target.value)} className={selectCls}>
-              {medicos.map(m => (
-                <option key={m.id} value={m.id}>{m.apellido}, {m.nombre}</option>
-              ))}
-            </select>
+            <div className="relative">
+              <select value={medicoId} onChange={e => setMedicoId(e.target.value)} className={selectCls}>
+                {medicos.map(m => (
+                  <option key={m.id} value={m.id} className="bg-surface text-text-primary">
+                    {m.apellido}, {m.nombre}
+                  </option>
+                ))}
+              </select>
+            </div>
           )}
         </div>
 
@@ -94,14 +98,20 @@ export default function NuevaAuditoriaPage() {
             <label className={labelCls}>MES *</label>
             <select value={mes} onChange={e => setMes(Number(e.target.value))} className={selectCls}>
               {MESES_ES.map((nombre, i) => (
-                <option key={i + 1} value={i + 1}>{nombre.toUpperCase()}</option>
+                <option key={i + 1} value={i + 1} className="bg-surface text-text-primary">
+                  {nombre.toUpperCase()}
+                </option>
               ))}
             </select>
           </div>
           <div>
             <label className={labelCls}>AÑO *</label>
             <select value={anio} onChange={e => setAnio(Number(e.target.value))} className={selectCls}>
-              {years.map(y => <option key={y} value={y}>{y}</option>)}
+              {years.map(y => (
+                <option key={y} value={y} className="bg-surface text-text-primary">
+                  {y}
+                </option>
+              ))}
             </select>
           </div>
         </div>
@@ -118,13 +128,13 @@ export default function NuevaAuditoriaPage() {
         )}
 
         {/* Divider */}
-        <div className="border-t border-[#222222]" />
+        <div className="border-t border-nd-border" />
 
         {/* Submit */}
         <button
           onClick={handleSubmit}
           disabled={submitting || loadingMedicos || medicos.length === 0}
-          className="w-full h-11 bg-text-display text-background rounded-full font-mono text-[11px] tracking-[0.07em] hover:bg-text-primary transition-colors disabled:opacity-40 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+          className="w-full h-11 bg-text-display text-background rounded-full font-mono text-[11px] tracking-[0.07em] hover:bg-text-primary transition-all shadow-lg active:scale-95 disabled:opacity-40 disabled:cursor-not-allowed flex items-center justify-center gap-2"
         >
           {submitting
             ? <><Loader2 size={14} className="animate-spin" />CREANDO...</>

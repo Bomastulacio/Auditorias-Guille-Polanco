@@ -47,9 +47,9 @@ function pctColor(pct: number) {
 }
 
 /* ── Shared style tokens ── */
-const selectCls = 'bg-transparent border-b border-[#333333] px-0 py-2 font-mono text-[11px] tracking-[0.05em] text-text-secondary focus:outline-none focus:border-text-primary transition-colors appearance-none cursor-pointer';
+const selectCls = 'bg-transparent border-b border-nd-border-vis px-0 py-2 font-mono text-[11px] tracking-[0.05em] text-text-secondary focus:outline-none focus:border-text-primary transition-colors appearance-none cursor-pointer';
 
-function Divider() { return <div className="border-t border-[#222222]" />; }
+function Divider() { return <div className="border-t border-nd-border" />; }
 
 function Th({ children, left }: { children: string; left?: boolean }) {
   return <th className={`nd-label py-2.5 ${left ? 'text-left' : 'text-right pl-4'}`}>{children}</th>;
@@ -72,7 +72,7 @@ function DiffBadge({ diff }: { diff: number | null }) {
 }
 function StatChip({ label, value, valueClass = 'text-text-primary' }: { label: string; value: string; valueClass?: string }) {
   return (
-    <div className="flex items-center gap-2 border border-[#333333] rounded-full px-4 py-1.5">
+    <div className="flex items-center gap-2 border border-nd-border-vis rounded-full px-4 py-1.5">
       <span className="nd-label">{label}</span>
       <span className={`font-mono text-sm tabular-nums font-bold ${valueClass}`}>{value}</span>
     </div>
@@ -105,7 +105,7 @@ function Heatmap({ auds, months }: { auds: AudFull[]; months: string[] }) {
     ...months.map(m => {
       const aud = auds.find(a => a.medico_id === med.id && a.mes === m);
       if (!aud) return (
-        <div key={`${med.id}-${m}`} className="h-8 border border-[#1A1A1A] flex items-center justify-center rounded">
+        <div key={`${med.id}-${m}`} className="h-8 border border-nd-border flex items-center justify-center rounded">
           <span className="font-mono text-[9px] text-text-disabled">—</span>
         </div>
       );
@@ -116,7 +116,7 @@ function Heatmap({ auds, months }: { auds: AudFull[]; months: string[] }) {
         : pct < 15 ? 'border-warning/30 text-warning bg-warning/5'
         : 'border-accent/30 text-accent bg-accent/5';
       return (
-        <div key={`${med.id}-${m}`} className={`h-8 border rounded flex items-center justify-center ${cls}`} title={`${pct.toFixed(1)}%`}>
+        <div key={`${med.id}-${m}`} className={`h-8 border rounded flex items-center justify-center transition-all hover:scale-105 ${cls}`} title={`${pct.toFixed(1)}%`}>
           <span className="font-mono text-[10px] font-bold">{pct.toFixed(0)}%</span>
         </div>
       );
@@ -235,7 +235,7 @@ export default function ReportesPage() {
   const years = useMemo(() => [now.getFullYear() - 2, now.getFullYear() - 1, now.getFullYear()], [now]);
 
   return (
-    <div className="max-w-4xl mx-auto w-full">
+    <div className="max-w-4xl mx-auto w-full pb-10">
 
       {/* Header */}
       <div className="px-6 pt-8 pb-6">
@@ -246,11 +246,11 @@ export default function ReportesPage() {
       <Divider />
 
       {/* Tab switcher */}
-      <div className="px-6 py-4 flex gap-1 border-b border-[#222222]">
+      <div className="px-6 py-4 flex gap-1 border-b border-nd-border">
         {([['mensual', 'MENSUAL'], ['trimestral', 'TRIMESTRAL'], ['estadisticas', 'ESTADÍSTICAS']] as [Tab, string][]).map(([t, label]) => (
           <button key={t} onClick={() => setTab(t)}
-            className={`px-4 py-1.5 rounded-full font-mono text-[11px] tracking-[0.05em] transition-colors ${
-              tab === t ? 'bg-text-display text-background' : 'text-text-disabled hover:text-text-secondary'
+            className={`px-4 py-1.5 rounded-full font-mono text-[11px] tracking-[0.05em] transition-all ${
+              tab === t ? 'bg-text-display text-background shadow-md' : 'text-text-disabled hover:text-text-primary'
             }`}>
             {label}
           </button>
@@ -260,12 +260,12 @@ export default function ReportesPage() {
       {/* ── TAB MENSUAL ── */}
       {tab === 'mensual' && (
         <section>
-          <div className="px-6 py-4 flex gap-6 border-b border-[#222222]">
+          <div className="px-6 py-4 flex gap-6 border-b border-nd-border">
             <select value={mesSelec} onChange={e => setMesSelec(Number(e.target.value))} className={selectCls}>
-              {MESES_ES.map((n, i) => <option key={i + 1} value={i + 1}>{n.toUpperCase()}</option>)}
+              {MESES_ES.map((n, i) => <option key={i + 1} value={i + 1} className="bg-surface">{n.toUpperCase()}</option>)}
             </select>
             <select value={anioMes} onChange={e => setAnioMes(Number(e.target.value))} className={selectCls}>
-              {years.map(y => <option key={y} value={y}>{y}</option>)}
+              {years.map(y => <option key={y} value={y} className="bg-surface">{y}</option>)}
             </select>
             <button onClick={fetchMensual} className="font-mono text-[11px] tracking-wider text-interactive hover:text-text-primary transition-colors whitespace-nowrap">
               BUSCAR →
@@ -276,38 +276,40 @@ export default function ReportesPage() {
             <EmptyState msg={`Sin auditorías completas en ${MESES_ES[mesSelec - 1].toUpperCase()} ${anioMes}.`} />
           ) : (
             <>
-              <div className="px-6 py-4 flex gap-2.5 flex-wrap border-b border-[#222222]">
+              <div className="px-6 py-4 flex gap-2.5 flex-wrap border-b border-nd-border">
                 <StatChip label="HCS" value={String(mesStats.total)} />
                 <StatChip label="DESVÍOS" value={String(mesStats.desvios)} />
                 <StatChip label="TASA" value={`${mesStats.pct}%`} valueClass={pctColor(mesStats.pct)} />
                 <StatChip label="MÉDICOS" value={String(audsMensual.length)} />
               </div>
-              <table className="w-full px-6">
-                <thead><tr className="border-b border-[#222222]">
-                  <Th left>MÉDICO</Th><Th>HCS</Th><Th>DESVÍOS</Th><Th>%</Th>
-                </tr></thead>
-                <tbody>
-                  {audsMensual.map(a => {
-                    const hcCount = a.historias_clinicas.length;
-                    const dev = a.historias_clinicas.filter(h => h.correccion !== '-').length;
-                    const pct = hcCount > 0 ? parseFloat((dev / hcCount * 100).toFixed(1)) : 0;
-                    return (
-                      <tr key={a.id} className="border-b border-[#1A1A1A] last:border-0 hover:bg-surface-raised transition-colors">
-                        <Td left>{a.medico.apellido}, {a.medico.nombre}</Td>
-                        <Td>{hcCount}</Td><Td>{dev}</Td>
-                        <Td><PctBadge pct={pct} /></Td>
-                      </tr>
-                    );
-                  })}
-                </tbody>
-                {audsMensual.length > 1 && (
-                  <tfoot><tr className="border-t border-[#333333]">
-                    <Td left bold>TOTAL</Td>
-                    <Td bold>{mesStats.total}</Td><Td bold>{mesStats.desvios}</Td>
-                    <Td><PctBadge pct={mesStats.pct} /></Td>
-                  </tr></tfoot>
-                )}
-              </table>
+              <div className="overflow-x-auto">
+                <table className="w-full">
+                  <thead><tr className="border-b border-nd-border">
+                    <Th left>MÉDICO</Th><Th>HCS</Th><Th>DESVÍOS</Th><Th>%</Th>
+                  </tr></thead>
+                  <tbody>
+                    {audsMensual.map(a => {
+                      const hcCount = a.historias_clinicas.length;
+                      const dev = a.historias_clinicas.filter(h => h.correccion !== '-').length;
+                      const pct = hcCount > 0 ? parseFloat((dev / hcCount * 100).toFixed(1)) : 0;
+                      return (
+                        <tr key={a.id} className="border-b border-nd-border last:border-0 hover:bg-surface-raised transition-colors">
+                          <Td left>{a.medico.apellido}, {a.medico.nombre}</Td>
+                          <Td>{hcCount}</Td><Td>{dev}</Td>
+                          <Td><PctBadge pct={pct} /></Td>
+                        </tr>
+                      );
+                    })}
+                  </tbody>
+                  {audsMensual.length > 1 && (
+                    <tfoot><tr className="border-t border-nd-border-vis">
+                      <Td left bold>TOTAL</Td>
+                      <Td bold>{mesStats.total}</Td><Td bold>{mesStats.desvios}</Td>
+                      <Td><PctBadge pct={mesStats.pct} /></Td>
+                    </tr></tfoot>
+                  )}
+                </table>
+              </div>
             </>
           )}
         </section>
@@ -316,12 +318,12 @@ export default function ReportesPage() {
       {/* ── TAB TRIMESTRAL ── */}
       {tab === 'trimestral' && (
         <section>
-          <div className="px-6 py-4 flex gap-6 border-b border-[#222222]">
+          <div className="px-6 py-4 flex gap-6 border-b border-nd-border">
             <select value={quarterSelec} onChange={e => setQuarterSelec(Number(e.target.value))} className={selectCls}>
-              {QUARTER_LABELS.map((l, i) => <option key={i + 1} value={i + 1}>{l}</option>)}
+              {QUARTER_LABELS.map((l, i) => <option key={i + 1} value={i + 1} className="bg-surface">{l}</option>)}
             </select>
             <select value={anioTrim} onChange={e => setAnioTrim(Number(e.target.value))} className={selectCls}>
-              {years.map(y => <option key={y} value={y}>{y}</option>)}
+              {years.map(y => <option key={y} value={y} className="bg-surface">{y}</option>)}
             </select>
             <button onClick={fetchTrimestral} className="font-mono text-[11px] tracking-wider text-interactive hover:text-text-primary transition-colors whitespace-nowrap">
               BUSCAR →
@@ -332,7 +334,7 @@ export default function ReportesPage() {
             <EmptyState msg={`Sin auditorías completas en el ${QUARTER_LABELS[quarterSelec - 1]} ${anioTrim}.`} />
           ) : (
             <>
-              <div className="px-6 py-4 flex gap-2.5 flex-wrap border-b border-[#222222]">
+              <div className="px-6 py-4 flex gap-2.5 flex-wrap border-b border-nd-border">
                 <StatChip label="HCS" value={String(trimStats.total)} />
                 <StatChip label="DESVÍOS" value={String(trimStats.desvios)} />
                 <StatChip label="TASA" value={`${trimStats.pct}%`} valueClass={pctColor(trimStats.pct)} />
@@ -342,32 +344,34 @@ export default function ReportesPage() {
                   </span>
                 )}
               </div>
-              <table className="w-full">
-                <thead><tr className="border-b border-[#222222]">
-                  <Th left>MÉDICO</Th><Th>HCS</Th><Th>DEV.</Th><Th>%</Th><Th>VS ANT.</Th>
-                </tr></thead>
-                <tbody>
-                  {trimByMedico.map(r => (
-                    <tr key={r.medico.id} className="border-b border-[#1A1A1A] last:border-0 hover:bg-surface-raised transition-colors">
-                      <Td left>{r.medico.apellido}, {r.medico.nombre}</Td>
-                      <Td>{r.hcs}</Td><Td>{r.desvios}</Td>
-                      <Td><PctBadge pct={r.pct} /></Td>
-                      <Td><DiffBadge diff={r.diff} /></Td>
-                    </tr>
-                  ))}
-                </tbody>
-                {trimByMedico.length > 1 && (
-                  <tfoot><tr className="border-t border-[#333333]">
-                    <Td left bold>TOTAL</Td>
-                    <Td bold>{trimStats.total}</Td><Td bold>{trimStats.desvios}</Td>
-                    <Td><PctBadge pct={trimStats.pct} /></Td>
-                    <Td><DiffBadge diff={prevStats.total > 0 ? parseFloat((trimStats.pct - prevStats.pct).toFixed(1)) : null} /></Td>
-                  </tr></tfoot>
-                )}
-              </table>
-              <div className="px-6 py-5 border-t border-[#222222]">
+              <div className="overflow-x-auto">
+                <table className="w-full">
+                  <thead><tr className="border-b border-nd-border">
+                    <Th left>MÉDICO</Th><Th>HCS</Th><Th>DEV.</Th><Th>%</Th><Th>VS ANT.</Th>
+                  </tr></thead>
+                  <tbody>
+                    {trimByMedico.map(r => (
+                      <tr key={r.medico.id} className="border-b border-nd-border last:border-0 hover:bg-surface-raised transition-colors">
+                        <Td left>{r.medico.apellido}, {r.medico.nombre}</Td>
+                        <Td>{r.hcs}</Td><Td>{r.desvios}</Td>
+                        <Td><PctBadge pct={r.pct} /></Td>
+                        <Td><DiffBadge diff={r.diff} /></Td>
+                      </tr>
+                    ))}
+                  </tbody>
+                  {trimByMedico.length > 1 && (
+                    <tfoot><tr className="border-t border-nd-border-vis">
+                      <Td left bold>TOTAL</Td>
+                      <Td bold>{trimStats.total}</Td><Td bold>{trimStats.desvios}</Td>
+                      <Td><PctBadge pct={trimStats.pct} /></Td>
+                      <Td><DiffBadge diff={prevStats.total > 0 ? parseFloat((trimStats.pct - prevStats.pct).toFixed(1)) : null} /></Td>
+                    </tr></tfoot>
+                  )}
+                </table>
+              </div>
+              <div className="px-6 py-5 border-t border-nd-border">
                 <button onClick={handleExportTrimestral} disabled={exportingTrim}
-                  className="flex items-center gap-2 h-9 px-5 border border-[#333333] rounded-full font-mono text-[11px] tracking-wider text-text-secondary hover:text-text-primary hover:border-text-secondary transition-colors disabled:opacity-40">
+                  className="flex items-center gap-2 h-9 px-5 border border-nd-border-vis rounded-full font-mono text-[11px] tracking-wider text-text-secondary hover:text-text-primary hover:border-text-secondary transition-all shadow-sm active:scale-95">
                   {exportingTrim
                     ? <><Loader2 size={12} className="animate-spin" />GENERANDO...</>
                     : <><FileText size={12} strokeWidth={1.5} />EXPORTAR WORD</>
@@ -387,7 +391,7 @@ export default function ReportesPage() {
           ) : (
             <>
               {/* Heatmap */}
-              <div className="px-6 py-6 border-b border-[#222222]">
+              <div className="px-6 py-6 border-b border-nd-border overflow-hidden">
                 <p className="nd-label mb-5">HEATMAP · % DESVÍOS · MÉDICO × MES · ÚLTIMOS 12 MESES</p>
                 <Heatmap auds={audsStats} months={last12} />
                 <div className="flex items-center gap-5 mt-4 flex-wrap">
@@ -401,7 +405,7 @@ export default function ReportesPage() {
                     <span className="w-3 h-3 border border-accent/30 bg-accent/5 rounded inline-block" />&gt;15%
                   </div>
                   <div className="flex items-center gap-1.5 nd-label">
-                    <span className="w-3 h-3 border border-[#1A1A1A] rounded inline-block" />SIN DATOS
+                    <span className="w-3 h-3 border border-nd-border rounded inline-block" />SIN DATOS
                   </div>
                 </div>
               </div>
@@ -431,7 +435,7 @@ export default function ReportesPage() {
                               const filled = r.pct > threshold;
                               const color = r.pct === 0 ? 'bg-success' : r.pct < 15 ? 'bg-warning' : 'bg-accent';
                               return (
-                                <div key={j} className={`flex-1 h-[4px] ${filled ? color : 'bg-[#1A1A1A]'}`} />
+                                <div key={j} className={`flex-1 h-[4px] ${filled ? color : 'bg-nd-border'} transition-colors duration-500`} />
                               );
                             })}
                           </div>

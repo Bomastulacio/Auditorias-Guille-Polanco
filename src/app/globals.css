@@ -1,5 +1,6 @@
 /* Doto variable font — dot-matrix display */
 @import url('https://fonts.googleapis.com/css2?family=Doto:wdth@0..100&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300..700&family=Space+Mono:ital,wght@0,400;0,700;1,400;1,700&display=swap');
 
 @import "tailwindcss";
 @import "tw-animate-css";
@@ -7,44 +8,69 @@
 @custom-variant dark (&:is(.dark *));
 
 /* ── Nothing Design System Tokens ── */
-@theme {
+:root {
   /* Background & surfaces */
-  --color-background: #000000;
-  --color-surface:    #111111;
-  --color-surface-raised: #1A1A1A;
+  --background: #FFFFFF;
+  --surface:    #F5F5F5;
+  --surface-raised: #EEEEEE;
 
   /* Borders */
-  --color-nd-border:     #222222;
-  --color-nd-border-vis: #333333;
+  --nd-border:     #E5E5E5;
+  --nd-border-vis: #D1D1D1;
 
   /* Text hierarchy */
-  --color-text-disabled:  #666666;
-  --color-text-secondary: #999999;
-  --color-text-primary:   #E8E8E8;
-  --color-text-display:   #FFFFFF;
+  --text-disabled:  #999999;
+  --text-secondary: #666666;
+  --text-primary:   #111111;
+  --text-display:   #000000;
 
   /* Status & accent */
-  --color-accent:  #D71921;
-  --color-success: #4A9E5C;
-  --color-warning: #D4A843;
-  --color-interactive: #5B9BF6;
+  --accent:  #D71921;
+  --success: #2E7D32;
+  --warning: #B8860B;
+  --interactive: #2563EB;
 
-  /* Fonts */
-  --font-sans:    "Space Grotesk", "DM Sans", system-ui, sans-serif;
-  --font-mono:    "Space Mono", "JetBrains Mono", monospace;
-  --font-display: "Doto", "Space Mono", monospace;
-
-  /* Radius */
-  --radius-sm:   4px;
-  --radius-md:   8px;
-  --radius-lg:   12px;
-  --radius-xl:   16px;
-  --radius-full: 9999px;
+  /* Shadcn variables (Light) */
+  --foreground: #111111;
+  --card: #FFFFFF;
+  --card-foreground: #111111;
+  --popover: #FFFFFF;
+  --popover-foreground: #111111;
+  --primary: #000000;
+  --primary-foreground: #FFFFFF;
+  --secondary: #F5F5F5;
+  --secondary-foreground: #111111;
+  --muted: #F5F5F5;
+  --muted-foreground: #666666;
+  --border: #E5E5E5;
+  --input: #E5E5E5;
+  --ring: #999999;
+  --radius: 0.75rem;
 }
 
-/* ── Shadcn compatibility layer ── */
-:root {
+.dark {
+  /* Background & surfaces */
   --background: #000000;
+  --surface:    #111111;
+  --surface-raised: #1A1A1A;
+
+  /* Borders */
+  --nd-border:     #222222;
+  --nd-border-vis: #333333;
+
+  /* Text hierarchy */
+  --text-disabled:  #666666;
+  --text-secondary: #999999;
+  --text-primary:   #E8E8E8;
+  --text-display:   #FFFFFF;
+
+  /* Status & accent */
+  --accent:  #D71921;
+  --success: #4A9E5C;
+  --warning: #D4A843;
+  --interactive: #5B9BF6;
+
+  /* Shadcn variables (Dark) */
   --foreground: #E8E8E8;
   --card: #111111;
   --card-foreground: #E8E8E8;
@@ -56,98 +82,106 @@
   --secondary-foreground: #E8E8E8;
   --muted: #1A1A1A;
   --muted-foreground: #999999;
-  --accent: #1A1A1A;
-  --accent-foreground: #E8E8E8;
-  --destructive: #D71921;
-  --destructive-foreground: #FFFFFF;
   --border: #222222;
   --input: #222222;
   --ring: #666666;
-  --radius: 0.75rem;
 }
 
-@theme inline {
+@theme {
   --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --color-card: var(--card);
-  --color-card-foreground: var(--card-foreground);
-  --color-border: var(--border);
-  --color-input: var(--input);
-  --color-ring: var(--ring);
-  --color-primary: var(--primary);
-  --color-primary-foreground: var(--primary-foreground);
-  --color-secondary: var(--secondary);
-  --color-secondary-foreground: var(--secondary-foreground);
-  --color-muted: var(--muted);
-  --color-muted-foreground: var(--muted-foreground);
-  --radius-sm: calc(var(--radius) * 0.6);
-  --radius-md: calc(var(--radius) * 0.8);
-  --radius-lg: var(--radius);
-  --radius-xl: calc(var(--radius) * 1.4);
+  --color-surface:    var(--surface);
+  --color-surface-raised: var(--surface-raised);
+
+  --color-nd-border:     var(--nd-border);
+  --color-nd-border-vis: var(--nd-border-vis);
+
+  --color-text-disabled:  var(--text-disabled);
+  --color-text-secondary: var(--text-secondary);
+  --color-text-primary:   var(--text-primary);
+  --color-text-display:   var(--text-display);
+
+  --color-accent:  var(--accent);
+  --color-success: var(--success);
+  --color-warning: var(--warning);
+  --color-interactive: var(--interactive);
+
+  --font-sans:    "Space Grotesk", "DM Sans", system-ui, sans-serif;
+  --font-mono:    "Space Mono", "JetBrains Mono", monospace;
+  --font-display: "Doto", "Space Mono", monospace;
+
+  --radius-sm:   4px;
+  --radius-md:   8px;
+  --radius-lg:   12px;
+  --radius-xl:   16px;
+  --radius-full: 9999px;
 }
 
 /* ── Base ── */
 body {
-  background-color: #000000;
-  color: #E8E8E8;
+  background-color: var(--background);
+  color: var(--text-primary);
   font-family: var(--font-sans);
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
+  transition: background-color 0.3s ease, color 0.3s ease;
 }
 
 /* ── Nothing utility classes ── */
 
-/* ALL CAPS instrument-panel label */
 .nd-label {
   font-family: var(--font-mono);
   font-size: 11px;
   line-height: 1.2;
   letter-spacing: 0.08em;
   text-transform: uppercase;
-  color: #999999;
+  color: var(--text-secondary);
 }
 
-/* Monospace numeric value */
 .nd-value {
   font-family: var(--font-mono);
-  color: #E8E8E8;
+  color: var(--text-primary);
   letter-spacing: 0.02em;
 }
 
-/* Dot-matrix hero number (Doto) */
 .nd-hero {
   font-family: var(--font-display);
   letter-spacing: -0.02em;
-  color: #FFFFFF;
+  color: var(--text-display);
   line-height: 1.0;
 }
 
-/* Flat surface card */
 .nd-card {
-  background: #111111;
-  border: 1px solid #222222;
+  background: var(--surface);
+  border: 1px solid var(--nd-border);
   border-radius: 12px;
 }
 
-/* Raised card */
 .nd-card-raised {
-  background: #1A1A1A;
-  border: 1px solid #333333;
+  background: var(--surface-raised);
+  border: 1px solid var(--nd-border-vis);
   border-radius: 12px;
 }
 
-/* Dot-grid background motif */
-.dot-grid {
-  background-image: radial-gradient(circle, #333333 1px, transparent 1px);
-  background-size: 16px 16px;
+/* ── Layout Utilities ── */
+.p-padding { padding: 2rem; }
+@media (max-width: 768px) {
+  .p-padding { padding: 1.5rem; }
 }
 
-/* ── Safe-area utilities for PWA ── */
 .pb-safe { padding-bottom: env(safe-area-inset-bottom, 0px); }
 .pt-safe { padding-top: env(safe-area-inset-top, 0px); }
-.mb-safe { margin-bottom: env(safe-area-inset-bottom, 0px); }
 
-@layer base {
-  * { @apply border-border; }
-  body { @apply bg-background text-foreground; }
+/* Custom Scrollbar */
+::-webkit-scrollbar {
+  width: 6px;
+}
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+::-webkit-scrollbar-thumb {
+  background: var(--nd-border-vis);
+  border-radius: 10px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: var(--text-disabled);
 }

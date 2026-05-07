@@ -12,7 +12,7 @@ function getInitials(nombre: string, apellido: string) {
 }
 
 /* ── Shared input style ── */
-const inputCls = 'w-full bg-transparent border-b border-[#333333] px-0 py-2 text-text-primary placeholder:text-text-disabled font-mono text-sm focus:outline-none focus:border-text-primary transition-colors';
+const inputCls = 'w-full bg-transparent border-b border-nd-border-vis px-0 py-2 text-text-primary placeholder:text-text-disabled font-mono text-sm focus:outline-none focus:border-text-primary transition-colors';
 const labelCls = 'nd-label block mb-2';
 
 /* ── Row component ── */
@@ -28,14 +28,14 @@ interface MedicoRowProps {
 function MedicoRow({ medico, isFirst, toggling, onEdit, onToggle, variant }: MedicoRowProps) {
   const isActive = variant === 'active';
   return (
-    <li className={`flex items-center gap-4 px-6 py-3.5 hover:bg-surface-raised transition-colors ${!isFirst ? 'border-t border-[#1A1A1A]' : ''}`}>
+    <li className={`flex items-center gap-4 px-6 py-3.5 hover:bg-surface-raised transition-colors ${!isFirst ? 'border-t border-nd-border' : ''}`}>
       {/* Initials */}
       <span className={`font-mono text-xs tabular-nums w-7 ${isActive ? 'text-text-secondary' : 'text-text-disabled'}`}>
         {getInitials(medico.nombre, medico.apellido)}
       </span>
 
       {/* Name */}
-      <p className={`flex-1 min-w-0 text-sm truncate ${isActive ? 'text-text-primary' : 'text-text-disabled line-through decoration-[#333333]'}`}>
+      <p className={`flex-1 min-w-0 text-sm truncate ${isActive ? 'text-text-primary' : 'text-text-disabled line-through decoration-nd-border-vis'}`}>
         {medico.apellido}, {medico.nombre}
       </p>
 
@@ -54,8 +54,8 @@ function MedicoRow({ medico, isFirst, toggling, onEdit, onToggle, variant }: Med
           title={isActive ? 'Desactivar' : 'Reactivar'}
           className={`flex items-center gap-1.5 px-3 py-1.5 border rounded-full font-mono text-[10px] tracking-[0.05em] transition-colors disabled:opacity-40 ${
             isActive
-              ? 'border-[#333333] text-text-secondary hover:border-accent hover:text-accent'
-              : 'border-[#222222] text-text-disabled hover:border-success hover:text-success'
+              ? 'border-nd-border-vis text-text-secondary hover:border-accent hover:text-accent'
+              : 'border-nd-border text-text-disabled hover:border-success hover:text-success'
           }`}
         >
           {toggling ? (
@@ -156,14 +156,14 @@ export default function MedicosPage() {
         </div>
         <button
           onClick={openAddModal}
-          className="flex items-center gap-2 h-9 px-5 bg-text-display text-background rounded-full font-mono text-[11px] tracking-[0.06em] hover:bg-text-primary transition-colors"
+          className="flex items-center gap-2 h-9 px-5 bg-text-display text-background rounded-full font-mono text-[11px] tracking-[0.06em] hover:bg-text-primary transition-all shadow-lg active:scale-95"
         >
           <Plus size={13} strokeWidth={2.5} />
           AGREGAR
         </button>
       </div>
 
-      <div className="border-t border-[#222222]" />
+      <div className="border-t border-nd-border" />
 
       {/* Error */}
       {fetchError && (
@@ -183,7 +183,7 @@ export default function MedicosPage() {
       {/* Activos */}
       {!loading && (
         <div>
-          <div className="px-6 py-3 flex items-center gap-2 border-b border-[#222222]">
+          <div className="px-6 py-3 flex items-center gap-2 border-b border-nd-border">
             <span className="w-1.5 h-1.5 rounded-full bg-success inline-block" />
             <span className="nd-label">ACTIVOS ({activos.length})</span>
           </div>
@@ -211,12 +211,12 @@ export default function MedicosPage() {
           {/* Inactivos */}
           {inactivos.length > 0 && (
             <>
-              <div className="border-t border-[#222222]" />
+              <div className="border-t border-nd-border" />
               <button
                 onClick={() => setShowInactivos(v => !v)}
-                className="w-full px-6 py-3 flex items-center gap-2 border-b border-[#222222] hover:bg-surface-raised transition-colors"
+                className="w-full px-6 py-3 flex items-center gap-2 border-b border-nd-border hover:bg-surface-raised transition-colors"
               >
-                <span className="w-1.5 h-1.5 rounded-full bg-[#444444] inline-block" />
+                <span className="w-1.5 h-1.5 rounded-full bg-text-disabled inline-block" />
                 <span className="nd-label">INACTIVOS ({inactivos.length})</span>
                 {showInactivos
                   ? <ChevronUp size={12} className="ml-auto text-text-disabled" />
@@ -244,8 +244,8 @@ export default function MedicosPage() {
       {/* Modal */}
       {modalMode && (
         <div className="fixed inset-0 z-[100] flex items-end sm:items-center justify-center p-4">
-          <div className="absolute inset-0 bg-black/85" onClick={closeModal} />
-          <div className="relative w-full max-w-sm bg-surface border border-[#333333] rounded-xl p-6 z-10">
+          <div className="absolute inset-0 bg-background/80 backdrop-blur-sm" onClick={closeModal} />
+          <div className="relative w-full max-w-sm bg-surface border border-nd-border-vis rounded-xl p-6 z-10 shadow-2xl">
             <div className="flex items-center justify-between mb-6">
               <span className="nd-label">{modalMode === 'add' ? 'AGREGAR MÉDICO' : 'EDITAR MÉDICO'}</span>
               <button onClick={closeModal} className="font-mono text-[11px] text-text-disabled hover:text-text-primary">
@@ -273,11 +273,11 @@ export default function MedicosPage() {
 
             <div className="flex gap-3 mt-8">
               <button onClick={closeModal}
-                className="flex-1 h-10 border border-[#333333] rounded-full font-mono text-[11px] tracking-wider text-text-secondary hover:text-text-primary transition-colors">
+                className="flex-1 h-10 border border-nd-border-vis rounded-full font-mono text-[11px] tracking-wider text-text-secondary hover:text-text-primary transition-colors">
                 CANCELAR
               </button>
               <button onClick={handleSave} disabled={saving}
-                className="flex-1 h-10 bg-text-display text-background rounded-full font-mono text-[11px] tracking-wider hover:bg-text-primary transition-colors disabled:opacity-40 flex items-center justify-center gap-2">
+                className="flex-1 h-10 bg-text-display text-background rounded-full font-mono text-[11px] tracking-wider hover:bg-text-primary transition-all disabled:opacity-40 flex items-center justify-center gap-2">
                 {saving ? <><Loader2 size={13} className="animate-spin" />GUARDANDO</> : 'GUARDAR'}
               </button>
             </div>

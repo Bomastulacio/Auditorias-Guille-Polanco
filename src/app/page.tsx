@@ -10,10 +10,11 @@ import { supabase } from '@/lib/supabase';
 import type { Auditoria, Medico, HistoriaClinica } from '@/types';
 import { MESES_ES } from '@/lib/constants';
 import { Plus, ChevronRight } from 'lucide-react';
+import { useTheme } from 'next-themes';
 
 type AudFull = Auditoria & { medico: Medico; historias_clinicas: HistoriaClinica[] };
 
-const CHART_COLORS = ['#FFFFFF', '#999999', '#666666', '#4A9E5C', '#D4A843', '#5B9BF6', '#D71921'];
+const CHART_COLORS = ['#D71921', '#5B9BF6', '#4A9E5C', '#D4A843', '#999999', '#666666', '#333333'];
 
 function getLast6MonthStarts(): string[] {
   const now = new Date();
@@ -56,7 +57,7 @@ function pctColor(pct: number) {
 /* ── Small components ── */
 
 function Divider() {
-  return <div className="border-t border-[#222222]" />;
+  return <div className="border-t border-nd-border" />;
 }
 
 function StatCard({ label, value, sub, valueClass = 'text-text-display' }: {
@@ -75,7 +76,7 @@ function TrimRow({ label, value, valueClass = 'text-text-primary' }: {
   label: string; value: string; valueClass?: string;
 }) {
   return (
-    <div className="flex items-center justify-between py-2.5 border-b border-[#1A1A1A] last:border-0">
+    <div className="flex items-center justify-between py-2.5 border-b border-nd-border last:border-0">
       <span className="nd-label">{label}</span>
       <span className={`font-mono text-sm tabular-nums ${valueClass}`}>{value}</span>
     </div>
@@ -85,6 +86,7 @@ function TrimRow({ label, value, valueClass = 'text-text-primary' }: {
 /* ── Page ── */
 
 export default function DashboardPage() {
+  const { theme } = useTheme();
   const [auditorias, setAuditorias] = useState<AudFull[]>([]);
   const [totalActivos, setTotalActivos] = useState(0);
   const [loading, setLoading] = useState(true);
@@ -171,7 +173,7 @@ export default function DashboardPage() {
         </div>
         <Link
           href="/auditorias/nueva"
-          className="hidden md:flex items-center gap-2 h-9 px-5 bg-text-display text-background rounded-full font-mono text-[11px] tracking-[0.06em] hover:bg-text-primary transition-colors"
+          className="hidden md:flex items-center gap-2 h-9 px-5 bg-text-display text-background rounded-full font-mono text-[11px] tracking-[0.06em] hover:bg-text-primary transition-all shadow-lg active:scale-95"
         >
           <Plus size={13} strokeWidth={2.5} />
           NUEVA AUDITORÍA
@@ -181,7 +183,7 @@ export default function DashboardPage() {
       <Divider />
 
       {/* ── Stat cards ── */}
-      <div className="grid grid-cols-1 sm:grid-cols-3 divide-y sm:divide-y-0 sm:divide-x divide-[#222222]">
+      <div className="grid grid-cols-1 sm:grid-cols-3 divide-y sm:divide-y-0 sm:divide-x divide-nd-border">
         <StatCard
           label="HCS DEL MES"
           value={mesStats.total === 0 ? '—' : String(mesStats.total)}
@@ -214,15 +216,15 @@ export default function DashboardPage() {
             <p className="nd-label mb-5">EVOLUCIÓN MENSUAL — % DESVÍOS POR MÉDICO</p>
             <ResponsiveContainer width="100%" height={200}>
               <LineChart data={chartData} margin={{ top: 0, right: 8, left: -28, bottom: 0 }}>
-                <CartesianGrid strokeDasharray="2 4" stroke="#1A1A1A" vertical={false} />
+                <CartesianGrid strokeDasharray="2 4" stroke={theme === 'dark' ? '#1A1A1A' : '#E5E5E5'} vertical={false} />
                 <XAxis
                   dataKey="label"
-                  tick={{ fill: '#666666', fontSize: 10, fontFamily: 'Space Mono' }}
+                  tick={{ fill: theme === 'dark' ? '#666666' : '#999999', fontSize: 10, fontFamily: 'Space Mono' }}
                   axisLine={false}
                   tickLine={false}
                 />
                 <YAxis
-                  tick={{ fill: '#666666', fontSize: 10, fontFamily: 'Space Mono' }}
+                  tick={{ fill: theme === 'dark' ? '#666666' : '#999999', fontSize: 10, fontFamily: 'Space Mono' }}
                   axisLine={false}
                   tickLine={false}
                   tickFormatter={v => `${v}%`}
@@ -230,12 +232,12 @@ export default function DashboardPage() {
                 />
                 <Tooltip
                   contentStyle={{
-                    background: '#111111',
-                    border: '1px solid #333333',
+                    background: theme === 'dark' ? '#111111' : '#FFFFFF',
+                    border: theme === 'dark' ? '1px solid #333333' : '1px solid #E5E5E5',
                     borderRadius: '8px',
                     fontSize: '11px',
                     fontFamily: 'Space Mono',
-                    color: '#E8E8E8',
+                    color: theme === 'dark' ? '#E8E8E8' : '#111111',
                   }}
                   formatter={(v) => (v == null ? 'Sin datos' : `${v}%`)}
                   labelStyle={{ color: '#666666', marginBottom: '4px' }}
@@ -261,13 +263,13 @@ export default function DashboardPage() {
       )}
 
       {/* ── Bottom grid ── */}
-      <div className="grid grid-cols-1 lg:grid-cols-[1fr_240px] divide-y lg:divide-y-0 lg:divide-x divide-[#222222]">
+      <div className="grid grid-cols-1 lg:grid-cols-[1fr_240px] divide-y lg:divide-y-0 lg:divide-x divide-nd-border">
 
         {/* Tabla mes */}
         <div className="px-6 py-6">
           <div className="flex items-center justify-between mb-4">
             <p className="nd-label">{MESES_ES[now.getMonth()].toUpperCase()} {now.getFullYear()} — POR MÉDICO</p>
-            <Link href="/auditorias" className="font-mono text-[10px] tracking-wider text-interactive flex items-center gap-0.5">
+            <Link href="/auditorias" className="font-mono text-[10px] tracking-wider text-interactive flex items-center gap-0.5 hover:text-text-primary transition-colors">
               VER TODAS <ChevronRight size={11} />
             </Link>
           </div>
@@ -275,14 +277,14 @@ export default function DashboardPage() {
           {meActual.length === 0 ? (
             <div className="py-8">
               <p className="font-mono text-[11px] text-text-disabled">Sin auditorías completas este mes.</p>
-              <Link href="/auditorias/nueva" className="font-mono text-[11px] text-interactive mt-1 inline-block">
+              <Link href="/auditorias/nueva" className="font-mono text-[11px] text-interactive mt-1 inline-block hover:underline">
                 INICIAR PRIMERA →
               </Link>
             </div>
           ) : (
             <table className="w-full text-sm">
               <thead>
-                <tr className="border-b border-[#222222]">
+                <tr className="border-b border-nd-border">
                   {['MÉDICO', 'HCS', 'DEV.', '%'].map((h, i) => (
                     <th key={h} className={`${i === 0 ? 'text-left' : 'text-right'} nd-label py-2 ${i > 0 ? 'pl-4' : ''}`}>{h}</th>
                   ))}
@@ -294,7 +296,7 @@ export default function DashboardPage() {
                   const dev = a.historias_clinicas.filter(h => h.correccion !== '-').length;
                   const pct = hcCount > 0 ? parseFloat((dev / hcCount * 100).toFixed(1)) : 0;
                   return (
-                    <tr key={a.id} className="border-b border-[#1A1A1A] last:border-0 hover:bg-surface-raised transition-colors group">
+                    <tr key={a.id} className="border-b border-nd-border last:border-0 hover:bg-surface-raised transition-colors group">
                       <td className="py-2.5 text-text-primary">
                         <Link href={`/auditorias/${a.id}`} className="group-hover:text-text-display transition-colors">
                           {a.medico.apellido}, {a.medico.nombre}
@@ -311,7 +313,7 @@ export default function DashboardPage() {
               </tbody>
               {meActual.length > 1 && (
                 <tfoot>
-                  <tr className="border-t border-[#333333]">
+                  <tr className="border-t border-nd-border-vis">
                     <td className="py-2 nd-label">TOTAL</td>
                     <td className="py-2 pl-4 text-right font-mono text-xs tabular-nums font-bold text-text-primary">{mesStats.total}</td>
                     <td className="py-2 pl-4 text-right font-mono text-xs tabular-nums font-bold text-text-primary">{mesStats.desvios}</td>
@@ -344,7 +346,7 @@ export default function DashboardPage() {
           )}
           <Link
             href="/reportes"
-            className="mt-4 font-mono text-[10px] tracking-wider text-interactive flex items-center gap-0.5"
+            className="mt-4 font-mono text-[10px] tracking-wider text-interactive flex items-center gap-0.5 hover:text-text-primary transition-colors"
           >
             VER REPORTES <ChevronRight size={11} />
           </Link>
