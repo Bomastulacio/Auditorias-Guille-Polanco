@@ -1,22 +1,25 @@
 import type { Metadata, Viewport } from "next";
-import { Geist, Geist_Mono } from "next/font/google";
+import { Space_Grotesk, Space_Mono } from "next/font/google";
 import "./globals.css";
-import WaveField from "@/components/WaveField";
 import Navigation from "@/components/Navigation";
 
-const geistSans = Geist({
-  variable: "--font-geist-sans",
+const spaceGrotesk = Space_Grotesk({
+  variable: "--font-sans",
   subsets: ["latin"],
+  weight: ["300", "400", "500", "700"],
+  display: "swap",
 });
 
-const geistMono = Geist_Mono({
-  variable: "--font-geist-mono",
+const spaceMono = Space_Mono({
+  variable: "--font-mono",
   subsets: ["latin"],
+  weight: ["400", "700"],
+  display: "swap",
 });
 
 export const metadata: Metadata = {
   title: "Auditoría HC | Guillermo Polanco",
-  description: "Plataforma premium para la auditoría y gestión de historias clínicas.",
+  description: "Registro y auditoría de historias clínicas — Base Río Gallegos",
   manifest: "/manifest.json",
   appleWebApp: {
     capable: true,
@@ -26,7 +29,7 @@ export const metadata: Metadata = {
 };
 
 export const viewport: Viewport = {
-  themeColor: "#6366F1",
+  themeColor: "#000000",
   width: "device-width",
   initialScale: 1,
   maximumScale: 1,
@@ -35,15 +38,12 @@ export const viewport: Viewport = {
 
 export default function RootLayout({
   children,
-}: Readonly<{
-  children: React.ReactNode;
-}>) {
+}: Readonly<{ children: React.ReactNode }>) {
   return (
-    <html lang="es" className={`${geistSans.variable} ${geistMono.variable}`}>
-      <body className="antialiased bg-background min-h-screen text-foreground relative overflow-x-hidden flex dark">
-        <WaveField />
+    <html lang="es" className={`${spaceGrotesk.variable} ${spaceMono.variable}`}>
+      <body className="antialiased bg-background text-text-primary min-h-screen overflow-x-hidden flex">
         <Navigation />
-        <main className="flex-1 relative z-10 flex flex-col min-h-screen pb-20 md:pb-0 h-screen overflow-y-auto">
+        <main className="flex-1 flex flex-col min-h-screen pb-20 md:pb-0 h-screen overflow-y-auto">
           {children}
         </main>
       </body>

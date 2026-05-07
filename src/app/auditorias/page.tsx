@@ -5,16 +5,13 @@ import Link from 'next/link';
 import { supabase } from '@/lib/supabase';
 import type { Auditoria, Medico, HistoriaClinica } from '@/types';
 import { MESES_ES } from '@/lib/constants';
-import { Plus, CheckCircle2, Clock, ChevronRight, Filter } from 'lucide-react';
+import { Plus, ChevronRight, CheckCircle2, Clock } from 'lucide-react';
 
-type AuditoriaRow = Auditoria & {
-  medico: Medico;
-  historias_clinicas: HistoriaClinica[];
-};
+type AuditoriaRow = Auditoria & { medico: Medico; historias_clinicas: HistoriaClinica[] };
 
 function getMesLabel(mes: string) {
   const [y, m] = mes.split('-');
-  return `${MESES_ES[parseInt(m) - 1]} ${y}`;
+  return `${MESES_ES[parseInt(m) - 1].toUpperCase()} ${y}`;
 }
 
 export default function AuditoriasPage() {
@@ -27,14 +24,9 @@ export default function AuditoriasPage() {
   const fetchData = useCallback(async () => {
     setLoading(true);
     const [{ data: audData }, { data: medData }] = await Promise.all([
-      supabase
-        .from('auditorias')
-        .select('*, medico:medicos(*), historias_clinicas(*)')
+      supabase.from('auditorias').select('*, medico:medicos(*), historias_clinicas(*)')
         .order('mes', { ascending: false }),
-      supabase
-        .from('medicos')
-        .select('*')
-        .order('apellido'),
+      supabase.from('medicos').select('*').order('apellido'),
     ]);
     if (audData) setAuditorias(audData as AuditoriaRow[]);
     if (medData) setMedicos(medData);
@@ -49,140 +41,107 @@ export default function AuditoriasPage() {
     return mesMatch && medicoMatch;
   });
 
-  const mesesDisponibles = [...new Set(auditorias.map(a => a.mes.slice(0, 7)))]
-    .sort()
-    .reverse();
+  const mesesDisponibles = [...new Set(auditorias.map(a => a.mes.slice(0, 7)))].sort().reverse();
+
+  const selectCls = 'bg-transparent border-b border-[#333333] px-0 py-2 font-mono text-[11px] tracking-[0.05em] text-text-secondary focus:outline-none focus:border-text-primary transition-colors appearance-none cursor-pointer pr-6';
 
   return (
-    <div className="p-6 md:p-padding max-w-3xl mx-auto">
+    <div className="max-w-3xl mx-auto w-full">
 
       {/* Header */}
-      <div className="flex items-center justify-between mb-6">
+      <div className="flex items-start justify-between px-6 pt-8 pb-6">
         <div>
-          <h1 className="text-3xl font-display font-bold text-foreground">Auditorías</h1>
+          <h1 className="text-3xl font-light tracking-[-0.02em] text-text-display">Auditorías</h1>
           {!loading && (
-            <p className="text-sm text-text-secondary mt-1">
-              {filtered.length} resultado{filtered.length !== 1 ? 's' : ''}
-            </p>
+            <p className="nd-label mt-1">{filtered.length} RESULTADO{filtered.length !== 1 ? 'S' : ''}</p>
           )}
         </div>
-        <Link
-          href="/auditorias/nueva"
-          className="flex items-center gap-2 bg-primary hover:bg-primary/80 text-white px-4 py-2.5 rounded-[14px] shadow-glow transition-all active:scale-95 font-medium text-sm"
-        >
-          <Plus size={17} />
-          <span>Nueva</span>
+        <Link href="/auditorias/nueva"
+          className="flex items-center gap-2 h-9 px-5 bg-text-display text-background rounded-full font-mono text-[11px] tracking-[0.06em] hover:bg-text-primary transition-colors">
+          <Plus size={13} strokeWidth={2.5} />
+          NUEVA
         </Link>
       </div>
 
+      <div className="border-t border-[#222222]" />
+
       {/* Filters */}
-      <div className="flex gap-3 mb-6 flex-wrap">
-        <div className="flex items-center gap-2 flex-1 min-w-[150px]">
-          <Filter size={14} className="text-text-secondary flex-shrink-0" />
-          <select
-            value={filterMes}
-            onChange={e => setFilterMes(e.target.value)}
-            className="flex-1 bg-white/5 border border-white/10 rounded-xl px-3 py-2 text-sm text-foreground focus:outline-none focus:border-primary/60 transition-colors"
-          >
-            <option value="">Todos los meses</option>
+      <div className="px-6 py-4 flex gap-6 border-b border-[#222222]">
+        <div className="relative flex-1">
+          <select value={filterMes} onChange={e => setFilterMes(e.target.value)} className={selectCls}>
+            <option value="">TODOS LOS MESES</option>
             {mesesDisponibles.map(m => {
               const [y, mon] = m.split('-');
-              return (
-                <option key={m} value={m}>
-                  {MESES_ES[parseInt(mon) - 1]} {y}
-                </option>
-              );
+              return <option key={m} value={m}>{MESES_ES[parseInt(mon) - 1].toUpperCase()} {y}</option>;
             })}
           </select>
         </div>
-
-        <select
-          value={filterMedicoId}
-          onChange={e => setFilterMedicoId(e.target.value)}
-          className="flex-1 min-w-[170px] bg-white/5 border border-white/10 rounded-xl px-3 py-2 text-sm text-foreground focus:outline-none focus:border-primary/60 transition-colors"
-        >
-          <option value="">Todos los médicos</option>
-          {medicos.map(m => (
-            <option key={m.id} value={m.id}>
-              {m.apellido}, {m.nombre}
-            </option>
-          ))}
-        </select>
+        <div className="relative flex-1">
+          <select value={filterMedicoId} onChange={e => setFilterMedicoId(e.target.value)} className={selectCls}>
+            <option value="">TODOS LOS MÉDICOS</option>
+            {medicos.map(m => <option key={m.id} value={m.id}>{m.apellido}, {m.nombre}</option>)}
+          </select>
+        </div>
       </div>
 
-      {/* Content */}
+      {/* List */}
       {loading ? (
-        <div className="space-y-3">
-          {[...Array(5)].map((_, i) => (
-            <div key={i} className="surface-elevated rounded-xl p-4 animate-pulse flex items-center gap-4">
-              <div className="flex-1 space-y-2">
-                <div className="h-4 bg-white/10 rounded w-1/3" />
-                <div className="h-3 bg-white/5 rounded w-1/5" />
-              </div>
-              <div className="w-14 h-5 bg-white/10 rounded w-1/6" />
-              <div className="w-20 h-6 bg-white/5 rounded-full" />
-            </div>
-          ))}
+        <div className="px-6 py-8">
+          <p className="nd-label animate-pulse">[CARGANDO...]</p>
         </div>
       ) : filtered.length === 0 ? (
-        <div className="surface-elevated rounded-xl py-14 text-center text-text-secondary">
-          <p className="mb-2 text-sm">
-            {auditorias.length === 0 ? 'Todavía no hay auditorías.' : 'Sin resultados para esos filtros.'}
+        <div className="px-6 py-10">
+          <p className="font-mono text-[11px] text-text-disabled">
+            {auditorias.length === 0 ? 'No hay auditorías registradas.' : 'Sin resultados para esos filtros.'}
           </p>
           {auditorias.length === 0 && (
-            <Link href="/auditorias/nueva" className="text-primary hover:underline text-sm">
-              Crear la primera
+            <Link href="/auditorias/nueva" className="font-mono text-[11px] text-interactive mt-1 block">
+              CREAR LA PRIMERA →
             </Link>
           )}
         </div>
       ) : (
-        <ul className="space-y-2">
-          {filtered.map(a => {
+        <ul>
+          {filtered.map((a, idx) => {
             const hcCount = a.historias_clinicas.length;
             const desvios = a.historias_clinicas.filter(h => h.correccion !== '-').length;
-            const pct = hcCount > 0 ? ((desvios / hcCount) * 100).toFixed(1) : '0.0';
+            const pct = hcCount > 0 ? (desvios / hcCount * 100).toFixed(1) : '0.0';
             return (
-              <li key={a.id}>
-                <Link
-                  href={`/auditorias/${a.id}`}
-                  className="surface-elevated rounded-xl px-4 py-3.5 flex items-center gap-4 hover:bg-white/5 transition-colors group"
-                >
-                  {/* Médico + mes */}
+              <li key={a.id} className={idx !== 0 ? 'border-t border-[#1A1A1A]' : ''}>
+                <Link href={`/auditorias/${a.id}`}
+                  className="flex items-center gap-4 px-6 py-4 hover:bg-surface-raised transition-colors group">
+                  {/* Status dot */}
+                  <div className={`w-1.5 h-1.5 rounded-full flex-shrink-0 ${a.completada ? 'bg-success' : 'bg-[#444444]'}`} />
+
+                  {/* Info */}
                   <div className="flex-1 min-w-0">
-                    <p className="font-medium text-foreground truncate">
+                    <p className="text-sm text-text-primary group-hover:text-text-display transition-colors truncate">
                       {a.medico.apellido}, {a.medico.nombre}
                     </p>
-                    <p className="text-sm text-text-secondary mt-0.5">
-                      {getMesLabel(a.mes)}
-                    </p>
+                    <p className="nd-label mt-0.5">{getMesLabel(a.mes)}</p>
                   </div>
 
-                  {/* Stats - desktop */}
-                  <div className="text-right flex-shrink-0 hidden sm:block">
-                    <p className="text-sm text-foreground font-medium tabular-nums">{hcCount}/20 HC</p>
+                  {/* Stats */}
+                  <div className="text-right hidden sm:block flex-shrink-0">
+                    <p className="font-mono text-xs text-text-secondary tabular-nums">{hcCount}/20</p>
                     {hcCount > 0 && (
-                      <p className="text-xs text-text-secondary">
-                        {desvios} desvío{desvios !== 1 ? 's' : ''} ({pct}%)
-                      </p>
+                      <p className="font-mono text-[10px] text-text-disabled tabular-nums">{desvios} dev. {pct}%</p>
                     )}
                   </div>
 
-                  {/* Status */}
-                  <div className={`flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-medium flex-shrink-0 ${
+                  {/* Badge */}
+                  <div className={`flex items-center gap-1.5 px-3 py-1 border rounded-full font-mono text-[10px] tracking-[0.04em] flex-shrink-0 ${
                     a.completada
-                      ? 'bg-emerald-500/15 text-emerald-400'
-                      : 'bg-blue-500/10 text-blue-400'
+                      ? 'border-success/40 text-success'
+                      : 'border-[#333333] text-text-disabled'
                   }`}>
                     {a.completada
-                      ? <><CheckCircle2 size={11} /> Completa</>
-                      : <><Clock size={11} /> En curso</>
+                      ? <><CheckCircle2 size={10} strokeWidth={1.5} />COMPLETA</>
+                      : <><Clock size={10} strokeWidth={1.5} />EN CURSO</>
                     }
                   </div>
 
-                  <ChevronRight
-                    size={16}
-                    className="text-text-secondary group-hover:text-foreground transition-colors flex-shrink-0"
-                  />
+                  <ChevronRight size={14} className="text-text-disabled group-hover:text-text-secondary transition-colors flex-shrink-0" />
                 </Link>
               </li>
             );

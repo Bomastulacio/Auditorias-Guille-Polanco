@@ -1,119 +1,95 @@
 'use client';
 
-import React, { useState } from 'react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import { Home, Stethoscope, ListChecks, BarChart3, Plus, Menu, X } from 'lucide-react';
+import { Home, Stethoscope, ListChecks, BarChart3, Plus } from 'lucide-react';
 import clsx from 'clsx';
 
 const NAV_ITEMS = [
-  { href: '/', label: 'Inicio', icon: Home },
-  { href: '/auditorias', label: 'Auditorías', icon: ListChecks },
-  { href: '/medicos', label: 'Médicos', icon: Stethoscope },
-  { href: '/reportes', label: 'Reportes', icon: BarChart3 },
+  { href: '/', label: 'INICIO', icon: Home },
+  { href: '/auditorias', label: 'AUDITORÍAS', icon: ListChecks },
+  { href: '/medicos', label: 'MÉDICOS', icon: Stethoscope },
+  { href: '/reportes', label: 'REPORTES', icon: BarChart3 },
 ];
 
 export default function Navigation() {
   const pathname = usePathname();
-  const [isSidebarOpen, setIsSidebarOpen] = useState(false);
 
   return (
     <>
-      {/* --- DESKTOP SIDEBAR --- */}
-      <aside className={clsx(
-        "hidden md:flex flex-col w-64 border-r border-border/20 surface-elevated h-screen sticky top-0 z-50 transition-all duration-300",
-        !isSidebarOpen && "md:w-20"
-      )}>
-        <div className="h-16 flex items-center justify-between px-4 border-b border-border/20">
-          {isSidebarOpen && (
-            <span className="font-display text-lg font-bold text-foreground">
-              Auditoria <span className="text-primary">HC</span>
-            </span>
-          )}
-          <button 
-            onClick={() => setIsSidebarOpen(!isSidebarOpen)}
-            className="p-2 rounded-full hover:bg-white/5 text-text-secondary transition-colors"
-          >
-            <Menu size={20} />
-          </button>
+      {/* ── Desktop sidebar ── */}
+      <aside className="hidden md:flex flex-col w-[196px] border-r border-[#222222] bg-background h-screen sticky top-0 z-50 flex-shrink-0">
+        {/* Brand */}
+        <div className="h-14 flex items-center px-6 border-b border-[#222222]">
+          <span className="font-mono text-[11px] tracking-[0.12em] text-text-display">
+            AUDITORÍA HC
+          </span>
         </div>
-        
-        <nav className="flex-1 py-4 flex flex-col gap-2 px-3">
-          {NAV_ITEMS.map((item) => {
-            const isActive = pathname === item.href || (item.href !== '/' && pathname.startsWith(item.href));
-            const Icon = item.icon;
+
+        {/* Nav links */}
+        <nav className="flex-1 py-3 flex flex-col">
+          {NAV_ITEMS.map(({ href, label, icon: Icon }) => {
+            const isActive =
+              pathname === href || (href !== '/' && pathname.startsWith(href));
             return (
               <Link
-                key={item.href}
-                href={item.href}
+                key={href}
+                href={href}
                 className={clsx(
-                  "flex items-center gap-3 px-3 py-3 rounded-xl transition-all duration-200",
-                  isActive 
-                    ? "bg-primary/20 text-primary font-medium" 
-                    : "text-text-secondary hover:bg-white/5 hover:text-foreground"
+                  'relative flex items-center gap-3 px-6 py-[11px] transition-colors duration-150',
+                  isActive
+                    ? 'text-text-display before:absolute before:left-0 before:top-[20%] before:h-[60%] before:w-0.5 before:bg-text-display'
+                    : 'text-text-disabled hover:text-text-secondary'
                 )}
-                title={item.label}
               >
-                <Icon size={22} className={clsx(isActive && "text-primary")} />
-                {isSidebarOpen && <span>{item.label}</span>}
+                <Icon size={17} strokeWidth={1.5} />
+                <span className="font-mono text-[11px] tracking-[0.07em]">{label}</span>
               </Link>
             );
           })}
         </nav>
 
-        {/* Desktop FAB equivalent */}
-        {isSidebarOpen ? (
-          <div className="p-4">
-            <Link 
-              href="/auditorias/nueva" 
-              className="flex items-center justify-center gap-2 w-full bg-primary hover:bg-primary/80 text-primary-foreground py-3 rounded-[16px] shadow-glow transition-all"
-            >
-              <Plus size={20} />
-              <span>Nueva Auditoría</span>
-            </Link>
-          </div>
-        ) : (
-          <div className="p-3">
-            <Link 
-              href="/auditorias/nueva" 
-              className="flex items-center justify-center w-full aspect-square bg-primary hover:bg-primary/80 text-primary-foreground rounded-[16px] shadow-glow transition-all"
-              title="Nueva Auditoría"
-            >
-              <Plus size={24} />
-            </Link>
-          </div>
-        )}
+        {/* CTA */}
+        <div className="p-4 border-t border-[#222222]">
+          <Link
+            href="/auditorias/nueva"
+            className="flex items-center justify-center gap-2 w-full h-10 bg-text-display text-background rounded-full font-mono text-[11px] tracking-[0.06em] hover:bg-text-primary transition-colors"
+          >
+            <Plus size={13} strokeWidth={2.5} />
+            NUEVA
+          </Link>
+        </div>
       </aside>
 
-      {/* --- MOBILE BOTTOM BAR --- */}
-      <nav className="md:hidden fixed bottom-0 left-0 right-0 z-50 surface-elevated border-t border-border/20 pb-safe">
-        <div className="flex items-center justify-around h-16">
-          {NAV_ITEMS.map((item) => {
-            const isActive = pathname === item.href || (item.href !== '/' && pathname.startsWith(item.href));
-            const Icon = item.icon;
+      {/* ── Mobile bottom bar ── */}
+      <nav className="md:hidden fixed bottom-0 left-0 right-0 z-50 bg-surface border-t border-[#222222] pb-safe">
+        <div className="flex items-stretch h-14">
+          {NAV_ITEMS.map(({ href, label, icon: Icon }) => {
+            const isActive =
+              pathname === href || (href !== '/' && pathname.startsWith(href));
             return (
               <Link
-                key={item.href}
-                href={item.href}
+                key={href}
+                href={href}
                 className={clsx(
-                  "flex flex-col items-center justify-center w-full h-full space-y-1 transition-colors",
-                  isActive ? "text-primary" : "text-text-secondary"
+                  'flex flex-col items-center justify-center gap-[3px] flex-1 transition-colors',
+                  isActive ? 'text-text-display' : 'text-text-disabled'
                 )}
               >
-                <Icon size={20} strokeWidth={isActive ? 2.5 : 2} />
-                <span className="text-[10px] font-medium">{item.label}</span>
+                <Icon size={18} strokeWidth={1.5} />
+                <span className="font-mono text-[9px] tracking-[0.05em]">{label}</span>
               </Link>
             );
           })}
         </div>
       </nav>
 
-      {/* --- MOBILE FAB (Floating Action Button) --- */}
-      <Link 
+      {/* ── Mobile FAB ── */}
+      <Link
         href="/auditorias/nueva"
-        className="md:hidden fixed bottom-20 right-4 z-50 flex items-center justify-center w-14 h-14 bg-primary text-primary-foreground rounded-full shadow-glow active:scale-95 transition-transform"
+        className="md:hidden fixed bottom-[74px] right-4 z-50 flex items-center justify-center w-12 h-12 bg-text-display text-background rounded-full"
       >
-        <Plus size={28} />
+        <Plus size={20} strokeWidth={2.5} />
       </Link>
     </>
   );
