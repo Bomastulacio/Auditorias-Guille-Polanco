@@ -1,0 +1,180 @@
+@import "tailwindcss";
+@import "tw-animate-css";
+@import "shadcn/tailwind.css";
+
+@custom-variant dark (&:is(.dark *));
+
+@theme {
+  --color-primary: #6366F1;
+  --color-secondary: #818CF8;
+  --color-tertiary: #C968F7;
+  --color-neutral: #050505;
+
+  --color-background: #050505;
+  --color-foreground: #E5E5E5;
+  --color-surface: #111111;
+  --color-text-primary: #E5E5E5;
+  --color-text-secondary: #737373;
+  --color-border-primary: #6366F1;
+
+  --spacing-base: 6.82px;
+  --spacing-sm: 3.41px;
+  --spacing-md: 6.82px;
+  --spacing-lg: 13.63px;
+  --spacing-xl: 20.45px;
+  --spacing-gap-sm: 10.92px;
+  --spacing-gap-lg: 32.76px;
+  --spacing-padding: 43.68px;
+
+  --radius-full: 9999px;
+
+  --font-display: "Google Sans Flex", "Inter", system-ui, sans-serif;
+  --font-body: system-ui, sans-serif;
+
+  --shadow-premium: 0 2px 3px -1px rgba(0, 0, 0, 0.1), 0 1px 0 0 rgba(25, 28, 33, 0.02), 0 0 0 1px rgba(25, 28, 33, 0.08);
+  --shadow-glow: 0 0 10px 0 rgb(129, 140, 248);
+}
+
+body {
+  background-color: var(--color-background);
+  color: var(--color-foreground);
+  font-family: var(--font-body);
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+h1, h2, h3, h4, h5, h6 {
+  font-family: var(--font-display);
+}
+
+/* Premium Glassmorphism & Elevated Surface */
+.surface-elevated {
+  background: rgba(17, 17, 17, 0.8);
+  backdrop-filter: blur(12px);
+  border: 0.8px solid var(--color-border-primary);
+  box-shadow: var(--shadow-premium);
+}
+
+/* Gradient Border Shell Technique */
+.gradient-border-wrapper {
+  position: relative;
+  padding: 1px;
+  background: linear-gradient(to right, #6366F1, #C968F7);
+  border-radius: 24px;
+}
+
+.gradient-border-content {
+  background: #050505;
+  border-radius: 23px;
+  height: 100%;
+  width: 100%;
+}
+
+/* WebGL Background Container */
+#glcanvas {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  z-index: -1;
+  pointer-events: none;
+}
+
+@theme inline {
+  --font-heading: var(--font-display);
+  --font-sans: var(--font-body);
+  
+  --color-primary: var(--primary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-success: var(--success);
+  --color-warning: var(--warning);
+  --color-danger: var(--danger);
+  --color-surface: var(--surface);
+  
+  /* shadcn mappings */
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --color-card: var(--card);
+  --color-card-foreground: var(--card-foreground);
+  --color-popover: var(--popover);
+  --color-popover-foreground: var(--popover-foreground);
+  --color-secondary: var(--secondary);
+  --color-secondary-foreground: var(--secondary-foreground);
+  --color-muted: var(--muted);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-accent: var(--accent);
+  --color-accent-foreground: var(--accent-foreground);
+  --color-destructive: var(--danger);
+  --color-destructive-foreground: #ffffff;
+  --color-border: var(--border);
+  --color-input: var(--input);
+  --color-ring: var(--ring);
+  
+  --radius-sm: calc(var(--radius) * 0.6);
+  --radius-md: calc(var(--radius) * 0.8);
+  --radius-lg: var(--radius);
+  --radius-xl: calc(var(--radius) * 1.4);
+  --radius-2xl: calc(var(--radius) * 1.8);
+}
+
+:root {
+  /* System Architecture Base (Dark Mode by default) */
+  --background: #050505;
+  --foreground: #E5E5E5;
+  
+  /* User requested palette */
+  --primary: #1e40af;
+  --primary-foreground: #ffffff;
+  --success: #16a34a;
+  --warning: #d97706;
+  --danger: #dc2626;
+  
+  --surface: rgba(17, 17, 17, 0.8);
+  
+  /* Shadcn variables adapted to Dark Premium */
+  --card: #111111;
+  --card-foreground: #E5E5E5;
+  --popover: #111111;
+  --popover-foreground: #E5E5E5;
+  --secondary: #1e293b;
+  --secondary-foreground: #f8fafc;
+  --muted: #1e293b;
+  --muted-foreground: #94a3b8;
+  --accent: #1e40af;
+  --accent-foreground: #ffffff;
+  --border: rgba(255, 255, 255, 0.1);
+  --input: rgba(255, 255, 255, 0.1);
+  --ring: #1e40af;
+  
+  --radius: 0.625rem;
+}
+
+/* Ensure we don't have a light mode overriding our dark mode layout unless needed */
+.dark {
+  --background: #050505;
+  --foreground: #E5E5E5;
+}
+
+@layer base {
+  * {
+    @apply border-border outline-ring/50;
+  }
+  body {
+    @apply bg-background text-foreground;
+  }
+  html {
+    @apply font-sans;
+  }
+}
+
+/* Safe-area utilities para PWA en iPhone con notch/Dynamic Island */
+.pb-safe {
+  padding-bottom: env(safe-area-inset-bottom, 0px);
+}
+.pt-safe {
+  padding-top: env(safe-area-inset-top, 0px);
+}
+.mb-safe {
+  margin-bottom: env(safe-area-inset-bottom, 0px);
+}

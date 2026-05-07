@@ -1,0 +1,26 @@
+{
+  "name": "Auditoría HC",
+  "short_name": "AuditoríaHC",
+  "description": "Registro y auditoría de historias clínicas — Guillermo Polanco",
+  "start_url": "/",
+  "display": "standalone",
+  "orientation": "portrait-primary",
+  "background_color": "#050505",
+  "theme_color": "#6366F1",
+  "icons": [
+    {
+      "src": "/icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "/icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ],
+  "categories": ["medical", "productivity"],
+  "lang": "es"
+}

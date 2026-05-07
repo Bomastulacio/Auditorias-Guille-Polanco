@@ -1,0 +1,22 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" width="512" height="512">
+  <rect width="512" height="512" rx="96" fill="#050505"/>
+  <rect width="512" height="512" rx="96" fill="url(#grad)" opacity="0.9"/>
+  <defs>
+    <linearGradient id="grad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#6366F1"/>
+      <stop offset="100%" style="stop-color:#C968F7"/>
+    </linearGradient>
+  </defs>
+  <!-- Stethoscope icon, centered -->
+  <g transform="translate(256,256)" fill="none" stroke="white" stroke-width="26" stroke-linecap="round" stroke-linejoin="round">
+    <!-- Body of stethoscope -->
+    <path d="M-80,-110 C-80,-60 -80,20 -40,60 C0,100 80,80 80,20 C80,-40 30,-80 0,-80"/>
+    <!-- Ear pieces -->
+    <line x1="-80" y1="-110" x2="-80" y2="-140"/>
+    <circle cx="-80" cy="-148" r="12" fill="white" stroke="none"/>
+    <line x1="0" y1="-80" x2="0" y2="-140"/>
+    <circle cx="0" cy="-148" r="12" fill="white" stroke="none"/>
+    <!-- Head -->
+    <circle cx="80" cy="20" r="30" stroke="white" stroke-width="26"/>
+  </g>
+</svg>
