@@ -1,12 +1,10 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { useTheme } from 'next-themes';
-import { Sun, Moon, ArrowUp } from 'lucide-react';
+import { ArrowUp } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 
 export default function FloatingControls() {
-  const { theme, setTheme } = useTheme();
   const [mounted, setMounted] = useState(false);
   const [showScroll, setShowScroll] = useState(false);
 
@@ -32,39 +30,21 @@ export default function FloatingControls() {
   };
 
   return (
-    <div className="fixed bottom-[88px] right-4 md:bottom-8 md:right-8 z-[100] flex flex-row-reverse gap-2 items-center">
-      {/* Scroll to Top */}
+    <div className="fixed bottom-20 right-4 md:bottom-8 md:right-8 z-[100]">
       <AnimatePresence>
         {showScroll && (
           <motion.button
-            initial={{ opacity: 0, scale: 0.5, x: 20 }}
-            animate={{ opacity: 1, scale: 1, x: 0 }}
-            exit={{ opacity: 0, scale: 0.5, x: 20 }}
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: 20 }}
             onClick={scrollToTop}
-            className="w-10 h-10 bg-surface/80 backdrop-blur-md border border-nd-border-vis rounded-full flex items-center justify-center text-text-primary shadow-2xl hover:bg-surface transition-all active:scale-90"
+            className="w-10 h-10 bg-surface/40 backdrop-blur-md border border-nd-border-vis rounded-full flex items-center justify-center text-text-secondary hover:text-text-primary transition-all active:scale-90"
             title="Subir"
           >
-            <ArrowUp size={16} strokeWidth={2.5} />
+            <ArrowUp size={16} strokeWidth={2} />
           </motion.button>
         )}
       </AnimatePresence>
-
-      {/* Theme Toggle - Minimalist style */}
-      <motion.button
-        initial={{ opacity: 0, x: 20 }}
-        animate={{ opacity: 1, x: 0 }}
-        onClick={() => setTheme(theme === 'dark' ? 'light' : 'dark')}
-        className="w-10 h-10 bg-surface/80 backdrop-blur-md border border-nd-border-vis rounded-full flex items-center justify-center text-text-primary shadow-2xl hover:bg-surface transition-all active:scale-90 overflow-hidden"
-      >
-        <motion.div
-          key={theme}
-          initial={{ y: 20, opacity: 0 }}
-          animate={{ y: 0, opacity: 1 }}
-          transition={{ type: "spring", stiffness: 300, damping: 20 }}
-        >
-          {theme === 'dark' ? <Moon size={16} /> : <Sun size={16} />}
-        </motion.div>
-      </motion.button>
     </div>
   );
 }

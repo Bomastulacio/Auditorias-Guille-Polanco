@@ -2,13 +2,13 @@
 
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import { Home, Stethoscope, ListChecks, BarChart3, Plus } from 'lucide-react';
-import clsx from 'clsx';
+import { LayoutDashboard, Users, ClipboardList, BarChart3 } from 'lucide-react';
+import ThemeToggle from './ThemeToggle';
 
-const NAV_ITEMS = [
-  { href: '/', label: 'INICIO', icon: Home },
-  { href: '/auditorias', label: 'AUDITORÍAS', icon: ListChecks },
-  { href: '/medicos', label: 'MÉDICOS', icon: Stethoscope },
+const LINKS = [
+  { href: '/', label: 'INICIO', icon: LayoutDashboard },
+  { href: '/auditorias', label: 'AUDITORÍAS', icon: ClipboardList },
+  { href: '/medicos', label: 'MÉDICOS', icon: Users },
   { href: '/reportes', label: 'REPORTES', icon: BarChart3 },
 ];
 
@@ -17,80 +17,71 @@ export default function Navigation() {
 
   return (
     <>
-      {/* ── Desktop sidebar ── */}
-      <aside className="hidden md:flex flex-col w-[196px] border-r border-nd-border bg-background h-screen sticky top-0 z-50 flex-shrink-0 transition-colors">
-        {/* Brand */}
-        <div className="h-14 flex items-center px-6 border-b border-nd-border">
-          <span className="font-mono text-[11px] tracking-[0.12em] text-text-display">
-            AUDITORÍA HC
-          </span>
+      {/* Mobile Top Bar (Theme Toggle only) */}
+      <div className="fixed top-4 right-4 z-[110] md:hidden">
+        <ThemeToggle />
+      </div>
+
+      {/* Desktop Sidebar */}
+      <nav className="hidden md:flex flex-col w-64 bg-background border-r border-nd-border h-screen sticky top-0 p-8">
+        <div className="mb-12">
+          <p className="font-mono text-[10px] tracking-[0.2em] text-text-disabled mb-1 uppercase">Sistema de</p>
+          <p className="text-xl font-bold tracking-tighter text-text-display">AUDITORÍA HC</p>
+          <div className="h-[1px] w-8 bg-accent mt-4" />
         </div>
 
-        {/* Nav links */}
-        <nav className="flex-1 py-3 flex flex-col">
-          {NAV_ITEMS.map(({ href, label, icon: Icon }) => {
-            const isActive =
-              pathname === href || (href !== '/' && pathname.startsWith(href));
+        <ul className="space-y-6 flex-1">
+          {LINKS.map((link) => {
+            const Icon = link.icon;
+            const isActive = pathname === link.href || (link.href !== '/' && pathname.startsWith(link.href));
             return (
-              <Link
-                key={href}
-                href={href}
-                className={clsx(
-                  'relative flex items-center gap-3 px-6 py-[11px] transition-all duration-200',
-                  isActive
-                    ? 'text-text-display before:absolute before:left-0 before:top-[20%] before:h-[60%] before:w-0.5 before:bg-text-display'
-                    : 'text-text-secondary hover:text-text-primary'
-                )}
-              >
-                <Icon size={17} strokeWidth={isActive ? 2 : 1.5} />
-                <span className="font-mono text-[11px] tracking-[0.07em]">{label}</span>
-              </Link>
+              <li key={link.href}>
+                <Link
+                  href={link.href}
+                  className={`flex items-center gap-4 font-mono text-[11px] tracking-[0.1em] transition-all group ${
+                    isActive ? 'text-text-primary' : 'text-text-disabled hover:text-text-secondary'
+                  }`}
+                >
+                  <div className={`p-2 rounded-lg transition-colors ${isActive ? 'bg-surface-raised border border-nd-border-vis' : 'group-hover:bg-surface'}`}>
+                    <Icon size={18} strokeWidth={isActive ? 2 : 1.5} />
+                  </div>
+                  {link.label}
+                  {isActive && <div className="ml-auto w-1.5 h-1.5 rounded-full bg-accent" />}
+                </Link>
+              </li>
             );
           })}
-        </nav>
+        </ul>
 
-        {/* CTA */}
-        <div className="p-4 border-t border-nd-border">
-          <Link
-            href="/auditorias/nueva"
-            className="flex items-center justify-center gap-2 w-full h-10 bg-text-display text-background rounded-full font-mono text-[11px] tracking-[0.06em] hover:bg-text-primary transition-colors shadow-lg"
-          >
-            <Plus size={13} strokeWidth={2.5} />
-            NUEVA
-          </Link>
-        </div>
-      </aside>
-
-      {/* ── Mobile bottom bar ── */}
-      <nav className="md:hidden fixed bottom-0 left-0 right-0 z-50 bg-surface border-t border-nd-border pb-safe transition-colors shadow-[0_-4px_20px_-10px_rgba(0,0,0,0.3)]">
-        <div className="flex items-stretch h-14">
-          {NAV_ITEMS.map(({ href, label, icon: Icon }) => {
-            const isActive =
-              pathname === href || (href !== '/' && pathname.startsWith(href));
-            return (
-              <Link
-                key={href}
-                href={href}
-                className={clsx(
-                  'flex flex-col items-center justify-center gap-[3px] flex-1 transition-colors',
-                  isActive ? 'text-text-display' : 'text-text-secondary'
-                )}
-              >
-                <Icon size={18} strokeWidth={isActive ? 2 : 1.5} />
-                <span className="font-mono text-[9px] tracking-[0.05em]">{label}</span>
-              </Link>
-            );
-          })}
+        {/* Desktop Theme Toggle at bottom of sidebar */}
+        <div className="mt-auto pt-8 border-t border-nd-border flex items-center justify-between">
+          <span className="font-mono text-[9px] text-text-disabled tracking-widest">TEMA</span>
+          <ThemeToggle />
         </div>
       </nav>
 
-      {/* ── Mobile FAB ── */}
-      <Link
-        href="/auditorias/nueva"
-        className="md:hidden fixed bottom-[74px] right-4 z-50 flex items-center justify-center w-12 h-12 bg-text-display text-background rounded-full shadow-2xl active:scale-95 transition-transform"
-      >
-        <Plus size={20} strokeWidth={2.5} />
-      </Link>
+      {/* Mobile Bottom Navigation */}
+      <nav className="md:hidden fixed bottom-0 left-0 right-0 bg-background/80 backdrop-blur-xl border-t border-nd-border h-16 px-4 z-[110]">
+        <ul className="flex items-center justify-around h-full">
+          {LINKS.map((link) => {
+            const Icon = link.icon;
+            const isActive = pathname === link.href || (link.href !== '/' && pathname.startsWith(link.href));
+            return (
+              <li key={link.href} className="flex-1">
+                <Link
+                  href={link.href}
+                  className={`flex flex-col items-center justify-center gap-1 transition-all ${
+                    isActive ? 'text-text-primary' : 'text-text-disabled'
+                  }`}
+                >
+                  <Icon size={20} strokeWidth={isActive ? 2.5 : 1.5} />
+                  <span className="font-mono text-[8px] tracking-tighter">{link.label}</span>
+                </Link>
+              </li>
+            );
+          })}
+        </ul>
+      </nav>
     </>
   );
 }
