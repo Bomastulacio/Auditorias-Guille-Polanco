@@ -1,6 +1,6 @@
 'use client';
 
-import { QueryClient } from '@tanstack/react-query';
+import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { ReactQueryDevtools } from '@tanstack/react-query-devtools';
 import { useState, useEffect } from 'react';
 import { PersistQueryClientProvider } from '@tanstack/react-query-persist-client';
@@ -13,7 +13,7 @@ export default function QueryProvider({ children }: { children: React.ReactNode 
         defaultOptions: {
           queries: {
             staleTime: 1000 * 60 * 5, // 5 minutos
-            gcTime: 1000 * 60 * 60 * 24, // 24 horas para basura
+            gcTime: 1000 * 60 * 60 * 24, // 24 horas
             refetchOnWindowFocus: false,
           },
         },
@@ -33,7 +33,15 @@ export default function QueryProvider({ children }: { children: React.ReactNode 
     }
   }, []);
 
-  if (!persister) return <>{children}</>;
+  // Durante el SSR (Build) o antes de que el persister esté listo,
+  // usamos el QueryClientProvider estándar para evitar errores de "No QueryClient set"
+  if (!persister) {
+    return (
+      <QueryClientProvider client={queryClient}>
+        {children}
+      </QueryClientProvider>
+    );
+  }
 
   return (
     <PersistQueryClientProvider
