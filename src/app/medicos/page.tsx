@@ -1,9 +1,10 @@
 'use client';
 
-import { useState, useEffect, useCallback } from 'react';
+import { useState } from 'react';
 import { supabase } from '@/lib/supabase';
 import { Medico } from '@/types';
 import { Plus, Pencil, UserCheck, UserX, Loader2, ChevronDown, ChevronUp } from 'lucide-react';
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 
 type ModalMode = 'add' | 'edit' | null;
 
@@ -11,7 +12,6 @@ function getInitials(nombre: string, apellido: string) {
   return `${nombre.charAt(0)}${apellido.charAt(0)}`.toUpperCase();
 }
 
-/* ── Shared input style ── */
 const inputCls = 'w-full bg-transparent border-b border-nd-border-vis px-0 py-2 text-text-primary placeholder:text-text-disabled font-mono text-sm focus:outline-none focus:border-text-primary transition-colors';
 const labelCls = 'nd-label block mb-2';
 
@@ -19,38 +19,29 @@ const labelCls = 'nd-label block mb-2';
 interface MedicoRowProps {
   medico: Medico;
   isFirst: boolean;
-  toggling: boolean;
   onEdit: () => void;
   onToggle: () => void;
   variant: 'active' | 'inactive';
+  isToggling: boolean;
 }
 
-function MedicoRow({ medico, isFirst, toggling, onEdit, onToggle, variant }: MedicoRowProps) {
+function MedicoRow({ medico, isFirst, onEdit, onToggle, variant, isToggling }: MedicoRowProps) {
   const isActive = variant === 'active';
   return (
     <li className={`flex items-center gap-4 px-6 py-3.5 hover:bg-surface-raised transition-colors ${!isFirst ? 'border-t border-nd-border' : ''}`}>
-      {/* Initials */}
       <span className={`font-mono text-xs tabular-nums w-7 ${isActive ? 'text-text-secondary' : 'text-text-disabled'}`}>
         {getInitials(medico.nombre, medico.apellido)}
       </span>
-
-      {/* Name */}
       <p className={`flex-1 min-w-0 text-sm truncate ${isActive ? 'text-text-primary' : 'text-text-disabled line-through decoration-nd-border-vis'}`}>
         {medico.apellido}, {medico.nombre}
       </p>
-
-      {/* Actions */}
       <div className="flex items-center gap-1 flex-shrink-0">
-        <button
-          onClick={onEdit}
-          title="Editar"
-          className="p-2 text-text-disabled hover:text-text-primary transition-colors"
-        >
+        <button onClick={onEdit} title="Editar" className="p-2 text-text-disabled hover:text-text-primary transition-colors">
           <Pencil size={13} strokeWidth={1.5} />
         </button>
         <button
           onClick={onToggle}
-          disabled={toggling}
+          disabled={isToggling}
           title={isActive ? 'Desactivar' : 'Reactivar'}
           className={`flex items-center gap-1.5 px-3 py-1.5 border rounded-full font-mono text-[10px] tracking-[0.05em] transition-colors disabled:opacity-40 ${
             isActive
@@ -58,7 +49,7 @@ function MedicoRow({ medico, isFirst, toggling, onEdit, onToggle, variant }: Med
               : 'border-nd-border text-text-disabled hover:border-success hover:text-success'
           }`}
         >
-          {toggling ? (
+          {isToggling ? (
             <Loader2 size={11} className="animate-spin" />
           ) : isActive ? (
             <><UserCheck size={11} strokeWidth={1.5} /><span className="hidden sm:inline">ACTIVO</span></>
@@ -74,70 +65,69 @@ function MedicoRow({ medico, isFirst, toggling, onEdit, onToggle, variant }: Med
 /* ── Page ── */
 
 export default function MedicosPage() {
-  const [medicos, setMedicos] = useState<Medico[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [fetchError, setFetchError] = useState<string | null>(null);
+  const queryClient = useQueryClient();
   const [modalMode, setModalMode] = useState<ModalMode>(null);
   const [editingMedico, setEditingMedico] = useState<Medico | null>(null);
   const [formNombre, setFormNombre] = useState('');
   const [formApellido, setFormApellido] = useState('');
-  const [saving, setSaving] = useState(false);
-  const [formError, setFormError] = useState<string | null>(null);
   const [showInactivos, setShowInactivos] = useState(false);
-  const [togglingId, setTogglingId] = useState<string | null>(null);
 
-  const fetchMedicos = useCallback(async () => {
-    setLoading(true);
-    setFetchError(null);
-    const { data, error } = await supabase
-      .from('medicos')
-      .select('*')
-      .order('apellido', { ascending: true })
-      .order('nombre', { ascending: true });
-    if (error) setFetchError('No se pudieron cargar los médicos.');
-    else setMedicos(data ?? []);
-    setLoading(false);
-  }, []);
+  // Fetch médicos
+  const { data: medicos = [], isLoading, error: fetchError } = useQuery({
+    queryKey: ['medicos'],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from('medicos')
+        .select('*')
+        .order('apellido', { ascending: true });
+      if (error) throw error;
+      return data as Medico[];
+    },
+  });
 
-  useEffect(() => { fetchMedicos(); }, [fetchMedicos]);
+  // Mutación para Guardar/Editar
+  const saveMutation = useMutation({
+    mutationFn: async (payload: { id?: string; nombre: string; apellido: string }) => {
+      if (payload.id) {
+        return supabase.from('medicos').update({ nombre: payload.nombre, apellido: payload.apellido }).eq('id', payload.id);
+      }
+      return supabase.from('medicos').insert({ nombre: payload.nombre, apellido: payload.apellido, activo: true });
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['medicos'] });
+      closeModal();
+    },
+  });
+
+  // Mutación para Toggle Activo
+  const toggleMutation = useMutation({
+    mutationFn: async ({ id, activo }: { id: string; activo: boolean }) => {
+      return supabase.from('medicos').update({ activo }).eq('id', id);
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['medicos'] });
+    },
+  });
 
   const openAddModal = () => {
-    setFormNombre(''); setFormApellido('');
-    setFormError(null); setEditingMedico(null);
-    setModalMode('add');
+    setFormNombre(''); setFormApellido(''); setEditingMedico(null); setModalMode('add');
   };
 
   const openEditModal = (m: Medico) => {
-    setFormNombre(m.nombre); setFormApellido(m.apellido);
-    setFormError(null); setEditingMedico(m);
-    setModalMode('edit');
+    setFormNombre(m.nombre); setFormApellido(m.apellido); setEditingMedico(m); setModalMode('edit');
   };
 
-  const closeModal = () => { setModalMode(null); setEditingMedico(null); setFormError(null); };
+  const closeModal = () => { setModalMode(null); setEditingMedico(null); };
 
-  const handleSave = async () => {
+  const handleSave = () => {
     const nombre = formNombre.trim();
     const apellido = formApellido.trim();
-    if (!nombre || !apellido) { setFormError('Nombre y apellido son requeridos.'); return; }
-    setSaving(true); setFormError(null);
-    if (modalMode === 'add') {
-      const { error } = await supabase.from('medicos').insert({ nombre, apellido, activo: true });
-      if (error) setFormError('No se pudo guardar.');
-      else { closeModal(); fetchMedicos(); }
-    } else if (modalMode === 'edit' && editingMedico) {
-      const { error } = await supabase.from('medicos').update({ nombre, apellido }).eq('id', editingMedico.id);
-      if (error) setFormError('No se pudo actualizar.');
-      else { closeModal(); fetchMedicos(); }
-    }
-    setSaving(false);
+    if (!nombre || !apellido) return;
+    saveMutation.mutate({ id: editingMedico?.id, nombre, apellido });
   };
 
-  const handleToggleActivo = async (medico: Medico) => {
-    setTogglingId(medico.id);
-    setMedicos(prev => prev.map(m => m.id === medico.id ? { ...m, activo: !m.activo } : m));
-    const { error } = await supabase.from('medicos').update({ activo: !medico.activo }).eq('id', medico.id);
-    if (error) setMedicos(prev => prev.map(m => m.id === medico.id ? { ...m, activo: medico.activo } : m));
-    setTogglingId(null);
+  const handleToggleActivo = (medico: Medico) => {
+    toggleMutation.mutate({ id: medico.id, activo: !medico.activo });
   };
 
   const activos = medicos.filter(m => m.activo);
@@ -145,12 +135,11 @@ export default function MedicosPage() {
 
   return (
     <div className="max-w-2xl mx-auto w-full">
-
       {/* Header */}
       <div className="flex items-start justify-between px-6 pt-8 pb-6">
         <div>
           <h1 className="text-3xl font-light tracking-[-0.02em] text-text-display">Médicos</h1>
-          {!loading && (
+          {!isLoading && (
             <p className="nd-label mt-1">{activos.length} ACTIVO{activos.length !== 1 ? 'S' : ''}</p>
           )}
         </div>
@@ -168,21 +157,21 @@ export default function MedicosPage() {
       {/* Error */}
       {fetchError && (
         <div className="mx-6 mt-4 px-4 py-3 border border-accent/40 rounded-lg font-mono text-xs text-accent flex justify-between">
-          <span>[ERROR] {fetchError}</span>
-          <button onClick={fetchMedicos} className="underline">REINTENTAR</button>
+          <span>[ERROR] No se pudieron cargar los datos.</span>
+          <button onClick={() => queryClient.invalidateQueries({ queryKey: ['medicos'] })} className="underline">REINTENTAR</button>
         </div>
       )}
 
       {/* Loading */}
-      {loading && (
+      {isLoading && (
         <div className="px-6 py-8">
           <p className="nd-label animate-pulse">[CARGANDO...]</p>
         </div>
       )}
 
       {/* Activos */}
-      {!loading && (
-        <div>
+      {!isLoading && (
+        <div className={saveMutation.isPending ? 'opacity-60 pointer-events-none' : ''}>
           <div className="px-6 py-3 flex items-center gap-2 border-b border-nd-border">
             <span className="w-1.5 h-1.5 rounded-full bg-success inline-block" />
             <span className="nd-label">ACTIVOS ({activos.length})</span>
@@ -199,10 +188,10 @@ export default function MedicosPage() {
             <ul className="bg-surface">
               {activos.map((m, i) => (
                 <MedicoRow key={m.id} medico={m} isFirst={i === 0}
-                  toggling={togglingId === m.id}
                   onEdit={() => openEditModal(m)}
                   onToggle={() => handleToggleActivo(m)}
                   variant="active"
+                  isToggling={toggleMutation.isPending && toggleMutation.variables?.id === m.id}
                 />
               ))}
             </ul>
@@ -223,15 +212,14 @@ export default function MedicosPage() {
                   : <ChevronDown size={12} className="ml-auto text-text-disabled" />
                 }
               </button>
-
               {showInactivos && (
                 <ul className="bg-surface">
                   {inactivos.map((m, i) => (
                     <MedicoRow key={m.id} medico={m} isFirst={i === 0}
-                      toggling={togglingId === m.id}
                       onEdit={() => openEditModal(m)}
                       onToggle={() => handleToggleActivo(m)}
                       variant="inactive"
+                      isToggling={toggleMutation.isPending && toggleMutation.variables?.id === m.id}
                     />
                   ))}
                 </ul>
@@ -248,11 +236,8 @@ export default function MedicosPage() {
           <div className="relative w-full max-w-sm bg-surface border border-nd-border-vis rounded-xl p-6 z-10 shadow-2xl">
             <div className="flex items-center justify-between mb-6">
               <span className="nd-label">{modalMode === 'add' ? 'AGREGAR MÉDICO' : 'EDITAR MÉDICO'}</span>
-              <button onClick={closeModal} className="font-mono text-[11px] text-text-disabled hover:text-text-primary">
-                [X]
-              </button>
+              <button onClick={closeModal} className="font-mono text-[11px] text-text-disabled hover:text-text-primary">[X]</button>
             </div>
-
             <div className="space-y-6">
               <div>
                 <label className={labelCls}>NOMBRE *</label>
@@ -266,19 +251,18 @@ export default function MedicosPage() {
                   onKeyDown={e => e.key === 'Enter' && handleSave()}
                   placeholder="García" className={inputCls} />
               </div>
-              {formError && (
-                <p className="font-mono text-[11px] text-accent">[ERROR] {formError}</p>
+              {saveMutation.isError && (
+                <p className="font-mono text-[11px] text-accent">[ERROR] No se pudo guardar.</p>
               )}
             </div>
-
             <div className="flex gap-3 mt-8">
               <button onClick={closeModal}
                 className="flex-1 h-10 border border-nd-border-vis rounded-full font-mono text-[11px] tracking-wider text-text-secondary hover:text-text-primary transition-colors">
                 CANCELAR
               </button>
-              <button onClick={handleSave} disabled={saving}
+              <button onClick={handleSave} disabled={saveMutation.isPending}
                 className="flex-1 h-10 bg-text-display text-background rounded-full font-mono text-[11px] tracking-wider hover:bg-text-primary transition-all disabled:opacity-40 flex items-center justify-center gap-2">
-                {saving ? <><Loader2 size={13} className="animate-spin" />GUARDANDO</> : 'GUARDAR'}
+                {saveMutation.isPending ? <><Loader2 size={13} className="animate-spin" />GUARDANDO</> : 'GUARDAR'}
               </button>
             </div>
           </div>

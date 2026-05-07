@@ -4,6 +4,7 @@ import "./globals.css";
 import Navigation from "@/components/Navigation";
 import { ThemeProvider } from "@/components/ThemeProvider";
 import FloatingControls from "@/components/FloatingControls";
+import QueryProvider from "@/components/QueryProvider";
 
 const spaceGrotesk = Space_Grotesk({
   variable: "--font-sans",
@@ -44,13 +45,15 @@ export default function RootLayout({
   return (
     <html lang="es" suppressHydrationWarning className={`${spaceGrotesk.variable} ${spaceMono.variable}`}>
       <body className="antialiased bg-background text-text-primary min-h-screen overflow-x-hidden flex">
-        <ThemeProvider attribute="class" defaultTheme="dark" enableSystem={false}>
-          <Navigation />
-          <main id="main-content" className="flex-1 flex flex-col min-h-screen pb-20 md:pb-0 h-screen overflow-y-auto scroll-smooth">
-            {children}
-            <FloatingControls />
-          </main>
-        </ThemeProvider>
+        <QueryProvider>
+          <ThemeProvider attribute="class" defaultTheme="dark" enableSystem={false}>
+            <Navigation />
+            <main id="main-content" className="flex-1 flex flex-col min-h-screen pb-20 md:pb-0 h-screen overflow-y-auto scroll-smooth">
+              {children}
+              <FloatingControls />
+            </main>
+          </ThemeProvider>
+        </QueryProvider>
       </body>
     </html>
   );
