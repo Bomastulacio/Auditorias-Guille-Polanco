@@ -5,6 +5,7 @@ import { supabase } from '@/lib/supabase';
 import { Medico } from '@/types';
 import { Plus, Pencil, UserCheck, UserX, Loader2, ChevronDown, ChevronUp } from 'lucide-react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import { toast } from 'sonner';
 
 type ModalMode = 'add' | 'edit' | null;
 
@@ -93,20 +94,28 @@ export default function MedicosPage() {
       }
       return supabase.from('medicos').insert({ nombre: payload.nombre, apellido: payload.apellido, activo: true });
     },
-    onSuccess: () => {
+    onSuccess: (_, variables) => {
       queryClient.invalidateQueries({ queryKey: ['medicos'] });
+      toast.success(variables.id ? 'Médico actualizado' : 'Médico agregado');
       closeModal();
     },
+    onError: () => {
+      toast.error('No se pudo guardar');
+    }
   });
 
   // Mutación para Toggle Activo
   const toggleMutation = useMutation({
-    mutationFn: async ({ id, activo }: { id: string; activo: boolean }) => {
+    mutationFn: async ({ id, activo, nombre, apellido }: { id: string; activo: boolean; nombre: string; apellido: string }) => {
       return supabase.from('medicos').update({ activo }).eq('id', id);
     },
-    onSuccess: () => {
+    onSuccess: (_, variables) => {
       queryClient.invalidateQueries({ queryKey: ['medicos'] });
+      toast.info(`${variables.apellido} ${variables.activo ? 'reactivado' : 'desactivado'}`);
     },
+    onError: () => {
+      toast.error('Error al cambiar estado');
+    }
   });
 
   const openAddModal = () => {
@@ -127,7 +136,7 @@ export default function MedicosPage() {
   };
 
   const handleToggleActivo = (medico: Medico) => {
-    toggleMutation.mutate({ id: medico.id, activo: !medico.activo });
+    toggleMutation.mutate({ id: medico.id, activo: !medico.activo, nombre: medico.nombre, apellido: medico.apellido });
   };
 
   const activos = medicos.filter(m => m.activo);
@@ -251,9 +260,6 @@ export default function MedicosPage() {
                   onKeyDown={e => e.key === 'Enter' && handleSave()}
                   placeholder="García" className={inputCls} />
               </div>
-              {saveMutation.isError && (
-                <p className="font-mono text-[11px] text-accent">[ERROR] No se pudo guardar.</p>
-              )}
             </div>
             <div className="flex gap-3 mt-8">
               <button onClick={closeModal}

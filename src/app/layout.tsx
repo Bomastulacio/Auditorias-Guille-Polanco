@@ -5,6 +5,7 @@ import Navigation from "@/components/Navigation";
 import { ThemeProvider } from "@/components/ThemeProvider";
 import FloatingControls from "@/components/FloatingControls";
 import QueryProvider from "@/components/QueryProvider";
+import { Toaster } from "sonner";
 
 const spaceGrotesk = Space_Grotesk({
   variable: "--font-sans",
@@ -52,6 +53,23 @@ export default function RootLayout({
               {children}
               <FloatingControls />
             </main>
+            <Toaster 
+              position="top-center" 
+              expand={false} 
+              richColors 
+              theme="dark"
+              toastOptions={{
+                style: {
+                  background: 'var(--surface)',
+                  border: '1px solid var(--nd-border-vis)',
+                  color: 'var(--text-primary)',
+                  fontFamily: 'var(--font-mono)',
+                  fontSize: '11px',
+                  letterSpacing: '0.02em',
+                  borderRadius: '12px',
+                },
+              }}
+            />
           </ThemeProvider>
         </QueryProvider>
       </body>
