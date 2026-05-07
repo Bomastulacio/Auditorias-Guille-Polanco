@@ -32,34 +32,37 @@ export default function FloatingControls() {
   };
 
   return (
-    <div className="fixed bottom-24 right-4 md:bottom-6 md:right-6 z-[100] flex flex-col gap-3">
+    <div className="fixed bottom-[88px] right-4 md:bottom-8 md:right-8 z-[100] flex flex-row-reverse gap-2 items-center">
       {/* Scroll to Top */}
       <AnimatePresence>
         {showScroll && (
           <motion.button
-            initial={{ opacity: 0, y: 10, scale: 0.9 }}
-            animate={{ opacity: 1, y: 0, scale: 1 }}
-            exit={{ opacity: 0, y: 10, scale: 0.9 }}
+            initial={{ opacity: 0, scale: 0.5, x: 20 }}
+            animate={{ opacity: 1, scale: 1, x: 0 }}
+            exit={{ opacity: 0, scale: 0.5, x: 20 }}
             onClick={scrollToTop}
-            className="w-11 h-11 bg-surface border border-nd-border-vis rounded-full flex items-center justify-center text-text-primary shadow-xl hover:bg-surface-raised transition-all active:scale-90"
-            title="Deslizar arriba"
+            className="w-10 h-10 bg-surface/80 backdrop-blur-md border border-nd-border-vis rounded-full flex items-center justify-center text-text-primary shadow-2xl hover:bg-surface transition-all active:scale-90"
+            title="Subir"
           >
-            <ArrowUp size={18} strokeWidth={2} />
+            <ArrowUp size={16} strokeWidth={2.5} />
           </motion.button>
         )}
       </AnimatePresence>
 
-      {/* Theme Toggle */}
+      {/* Theme Toggle - Minimalist style */}
       <motion.button
+        initial={{ opacity: 0, x: 20 }}
+        animate={{ opacity: 1, x: 0 }}
         onClick={() => setTheme(theme === 'dark' ? 'light' : 'dark')}
-        className="w-11 h-11 bg-surface border border-nd-border-vis rounded-full flex items-center justify-center text-text-primary shadow-xl hover:bg-surface-raised transition-all active:scale-90 overflow-hidden"
-        title={theme === 'dark' ? 'Modo claro' : 'Modo oscuro'}
+        className="w-10 h-10 bg-surface/80 backdrop-blur-md border border-nd-border-vis rounded-full flex items-center justify-center text-text-primary shadow-2xl hover:bg-surface transition-all active:scale-90 overflow-hidden"
       >
         <motion.div
-          animate={{ rotate: theme === 'dark' ? 0 : 180 }}
-          transition={{ type: "spring", stiffness: 200, damping: 10 }}
+          key={theme}
+          initial={{ y: 20, opacity: 0 }}
+          animate={{ y: 0, opacity: 1 }}
+          transition={{ type: "spring", stiffness: 300, damping: 20 }}
         >
-          {theme === 'dark' ? <Moon size={18} /> : <Sun size={18} />}
+          {theme === 'dark' ? <Moon size={16} /> : <Sun size={16} />}
         </motion.div>
       </motion.button>
     </div>
