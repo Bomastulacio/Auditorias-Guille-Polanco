@@ -5,8 +5,9 @@ import Link from 'next/link';
 import { supabase } from '@/lib/supabase';
 import type { Auditoria, Medico, HistoriaClinica } from '@/types';
 import { MESES_ES } from '@/lib/constants';
-import { Plus, ChevronRight, CheckCircle2, Clock } from 'lucide-react';
-import { useQuery } from '@tanstack/react-query';
+import { Plus, ChevronRight, CheckCircle2, Clock, Trash2, Pencil, Loader2, AlertCircle, X } from 'lucide-react';
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import { toast } from 'sonner';
 
 type AuditoriaRow = Auditoria & { medico: Medico; historias_clinicas: HistoriaClinica[] };
 
@@ -16,8 +17,15 @@ function getMesLabel(mes: string) {
 }
 
 export default function AuditoriasPage() {
+  const queryClient = useQueryClient();
   const [filterMes, setFilterMes] = useState('');
   const [filterMedicoId, setFilterMedicoId] = useState('');
+  
+  // State for editing
+  const [editingAuditoria, setEditingAuditoria] = useState<AuditoriaRow | null>(null);
+  const [editMedicoId, setEditMedicoId] = useState('');
+  const [editMes, setEditMes] = useState(1);
+  const [editAnio, setEditAnio] = useState(new Date().getFullYear());
 
   const { data: auditorias = [], isLoading: loadingAuds } = useQuery({
     queryKey: ['auditorias'],
@@ -44,6 +52,73 @@ export default function AuditoriasPage() {
     const medicoMatch = !filterMedicoId || a.medico_id === filterMedicoId;
     return mesMatch && medicoMatch;
   });
+
+  const deleteMutation = useMutation({
+    mutationFn: async (id: string) => {
+      const { error } = await supabase.from('auditorias').delete().eq('id', id);
+      if (error) throw error;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['auditorias'] });
+      toast.success('Auditoría eliminada');
+    },
+    onError: (err) => {
+      console.error(err);
+      toast.error('Error al eliminar la auditoría');
+    }
+  });
+
+  const updateMutation = useMutation({
+    mutationFn: async (payload: { id: string, medico_id: string, mes: string }) => {
+      const { error } = await supabase.from('auditorias')
+        .update({ medico_id: payload.medico_id, mes: payload.mes })
+        .eq('id', payload.id);
+      if (error) throw error;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['auditorias'] });
+      toast.success('Auditoría actualizada');
+      setEditingAuditoria(null);
+    },
+    onError: (err: any) => {
+      console.error(err);
+      if (err.code === '23505') {
+        toast.error('Ya existe una auditoría para ese médico en ese mes');
+      } else {
+        toast.error('Error al actualizar la auditoría');
+      }
+    }
+  });
+
+  const handleEditClick = (e: React.MouseEvent, a: AuditoriaRow) => {
+    e.preventDefault();
+    e.stopPropagation();
+    const [y, m] = a.mes.split('-');
+    setEditMedicoId(a.medico_id);
+    setEditMes(parseInt(m));
+    setEditAnio(parseInt(y));
+    setEditingAuditoria(a);
+  };
+
+  const handleDeleteClick = (e: React.MouseEvent, id: string) => {
+    e.preventDefault();
+    e.stopPropagation();
+    if (confirm('¿Estás seguro de que querés borrar esta auditoría? Se borrarán todos los registros asociados.')) {
+      deleteMutation.mutate(id);
+    }
+  };
+
+  const handleSaveEdit = () => {
+    if (!editingAuditoria) return;
+    const mesStr = `${editAnio}-${String(editMes).padStart(2, '0')}-01`;
+    updateMutation.mutate({
+      id: editingAuditoria.id,
+      medico_id: editMedicoId,
+      mes: mesStr
+    });
+  };
+
+  const years = [new Date().getFullYear() - 1, new Date().getFullYear(), new Date().getFullYear() + 1];
 
   const mesesDisponibles = [...new Set(auditorias.map(a => a.mes.slice(0, 7)))].sort().reverse();
 
@@ -119,12 +194,105 @@ export default function AuditoriasPage() {
                   <div className={`flex items-center gap-1.5 px-3 py-1 border rounded-full font-mono text-[10px] tracking-[0.04em] flex-shrink-0 transition-colors ${a.completada ? 'border-success/40 text-success bg-success/5' : 'border-nd-border-vis text-text-disabled'}`}>
                     {a.completada ? <><CheckCircle2 size={10} strokeWidth={1.5} />COMPLETA</> : <><Clock size={10} strokeWidth={1.5} />EN CURSO</>}
                   </div>
+                  
+                  <div className="flex items-center gap-1 ml-2 opacity-0 group-hover:opacity-100 transition-opacity">
+                    <button
+                      onClick={(e) => handleEditClick(e, a)}
+                      className="p-2 text-text-disabled hover:text-text-primary transition-colors"
+                      title="Editar"
+                    >
+                      <Pencil size={14} strokeWidth={1.5} />
+                    </button>
+                    <button
+                      onClick={(e) => handleDeleteClick(e, a.id)}
+                      className="p-2 text-text-disabled hover:text-accent transition-colors"
+                      title="Eliminar"
+                    >
+                      <Trash2 size={14} strokeWidth={1.5} />
+                    </button>
+                  </div>
+
                   <ChevronRight size={14} className="text-text-disabled group-hover:text-text-primary transition-colors flex-shrink-0" />
                 </Link>
               </li>
             );
           })}
         </ul>
+      )}
+
+      {/* Edit Modal */}
+      {editingAuditoria && (
+        <div className="fixed inset-0 z-[120] flex items-end sm:items-center justify-center p-4">
+          <div className="absolute inset-0 bg-background/80 backdrop-blur-sm" onClick={() => setEditingAuditoria(null)} />
+          <div className="relative w-full max-w-sm bg-surface border border-nd-border-vis rounded-xl p-6 z-10 shadow-2xl">
+            <div className="flex items-center justify-between mb-6">
+              <span className="nd-label">EDITAR AUDITORÍA</span>
+              <button onClick={() => setEditingAuditoria(null)} className="text-text-disabled hover:text-text-primary transition-colors">
+                <X size={18} />
+              </button>
+            </div>
+
+            <div className="space-y-6">
+              {/* Médico */}
+              <div>
+                <label className="nd-label block mb-2">MÉDICO</label>
+                <select 
+                  value={editMedicoId} 
+                  onChange={e => setEditMedicoId(e.target.value)} 
+                  className="w-full bg-transparent border-b border-nd-border-vis px-0 py-2 font-mono text-sm text-text-primary focus:outline-none focus:border-text-primary transition-colors appearance-none cursor-pointer"
+                >
+                  {medicos.map(m => (
+                    <option key={m.id} value={m.id} className="bg-surface">{m.apellido}, {m.nombre}</option>
+                  ))}
+                </select>
+              </div>
+
+              {/* Mes + Año */}
+              <div className="grid grid-cols-2 gap-6">
+                <div>
+                  <label className="nd-label block mb-2">MES</label>
+                  <select 
+                    value={editMes} 
+                    onChange={e => setEditMes(Number(e.target.value))} 
+                    className="w-full bg-transparent border-b border-nd-border-vis px-0 py-2 font-mono text-sm text-text-primary focus:outline-none focus:border-text-primary transition-colors appearance-none cursor-pointer"
+                  >
+                    {MESES_ES.map((nombre, i) => (
+                      <option key={i + 1} value={i + 1} className="bg-surface">{nombre.toUpperCase()}</option>
+                    ))}
+                  </select>
+                </div>
+                <div>
+                  <label className="nd-label block mb-2">AÑO</label>
+                  <select 
+                    value={editAnio} 
+                    onChange={e => setEditAnio(Number(e.target.value))} 
+                    className="w-full bg-transparent border-b border-nd-border-vis px-0 py-2 font-mono text-sm text-text-primary focus:outline-none focus:border-text-primary transition-colors appearance-none cursor-pointer"
+                  >
+                    {years.map(y => (
+                      <option key={y} value={y} className="bg-surface">{y}</option>
+                    ))}
+                  </select>
+                </div>
+              </div>
+            </div>
+
+            <div className="flex gap-3 mt-8">
+              <button 
+                onClick={() => setEditingAuditoria(null)}
+                className="flex-1 h-10 border border-nd-border-vis rounded-full font-mono text-[11px] tracking-wider text-text-secondary hover:text-text-primary transition-colors"
+              >
+                CANCELAR
+              </button>
+              <button 
+                onClick={handleSaveEdit} 
+                disabled={updateMutation.isPending}
+                className="flex-1 h-10 bg-text-display text-background rounded-full font-mono text-[11px] tracking-wider hover:bg-text-primary transition-all disabled:opacity-40 flex items-center justify-center gap-2"
+              >
+                {updateMutation.isPending ? <><Loader2 size={13} className="animate-spin" />GUARDANDO</> : 'GUARDAR'}
+              </button>
+            </div>
+          </div>
+        </div>
       )}
     </div>
   );
