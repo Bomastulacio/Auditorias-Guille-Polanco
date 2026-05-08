@@ -2,7 +2,7 @@
 
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import { LayoutDashboard, Users, ClipboardList, BarChart3 } from 'lucide-react';
+import { LayoutDashboard, Users, ClipboardList, BarChart3, FileUp } from 'lucide-react';
 import ThemeToggle from './ThemeToggle';
 
 const LINKS = [
@@ -53,10 +53,26 @@ export default function Navigation() {
           })}
         </ul>
 
-        {/* Desktop Theme Toggle at bottom of sidebar */}
-        <div className="mt-auto pt-8 border-t border-nd-border flex items-center justify-between">
-          <span className="font-mono text-[9px] text-text-disabled tracking-widest">TEMA</span>
-          <ThemeToggle />
+        {/* Secondary utility link */}
+        <div className="mt-auto pt-6 border-t border-nd-border space-y-4">
+          <Link
+            href="/importar"
+            className={`flex items-center gap-4 font-mono text-[11px] tracking-[0.1em] transition-all group ${
+              pathname.startsWith('/importar') ? 'text-text-primary' : 'text-text-disabled hover:text-text-secondary'
+            }`}
+          >
+            <div className={`p-2 rounded-lg transition-colors ${pathname.startsWith('/importar') ? 'bg-surface-raised border border-nd-border-vis' : 'group-hover:bg-surface'}`}>
+              <FileUp size={18} strokeWidth={pathname.startsWith('/importar') ? 2 : 1.5} />
+            </div>
+            IMPORTAR
+            {pathname.startsWith('/importar') && <div className="ml-auto w-1.5 h-1.5 rounded-full bg-accent" />}
+          </Link>
+
+          {/* Desktop Theme Toggle */}
+          <div className="flex items-center justify-between pt-2 border-t border-nd-border">
+            <span className="font-mono text-[9px] text-text-disabled tracking-widest">TEMA</span>
+            <ThemeToggle />
+          </div>
         </div>
       </nav>
 
